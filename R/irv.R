@@ -13,7 +13,9 @@ irv <- function(votes) {
   remaining <- drop_not_included_in_fps(all_entries, fps)
 
   while(length(remaining) > 1) {
-    fps
+    votes <- update_prefs(votes, remaining)
+    votes <- drop_empty_votes(votes)
+    fps <- get_first_preferences
   }
 }
 

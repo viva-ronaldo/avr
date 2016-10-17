@@ -17,3 +17,8 @@ update_prefs <- function(votes, remaining) {
 drop_empty_votes <- function(votes) {
   votes[sapply(votes, function(vote) length(vote) > 0)]
 }
+
+get_lowest_voted <- function(fps) {
+  tab <- table(fps)
+  names(tab)[tab == min(tab)]
+}
