@@ -15,9 +15,12 @@ irv <- function(votes) {
   while(length(remaining) > 1) {
     votes <- update_prefs(votes, remaining)
     votes <- drop_empty_votes(votes)
-    fps <- get_first_preferences
+
+    fps <- get_first_preferences(votes)
+    least_common <- get_lowest_voted(fps)
+
+    remaining <- drop_least_common(remaining, least_common)
   }
+
+  list(winner = remaining)
 }
-
-votes <- data
-

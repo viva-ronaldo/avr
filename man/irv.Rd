@@ -4,10 +4,10 @@
 \alias{irv}
 \title{Instant runoff voting.}
 \usage{
-irv(votelist)
+irv(votes)
 }
 \arguments{
-\item{votelist}{A names list of order-of-preference vote vectors.}
+\item{votes}{A names list of order-of-preference vote vectors.}
 }
 \value{
 An IRV object, containing:

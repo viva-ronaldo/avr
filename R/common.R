@@ -10,6 +10,10 @@ drop_not_included_in_fps <- function(remaining, fps) {
   remaining[remaining %in% fps]
 }
 
+drop_least_common <- function(remaining, lcs) {
+  remaining[!remaining %in% lcs]
+}
+
 update_prefs <- function(votes, remaining) {
   lapply(votes, function(vote) vote[vote %in% remaining])
 }
