@@ -1,8 +1,8 @@
 Package: avr
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
+Title: Alternative voting systems in R.
+Version: 0.1
 Authors@R: person("Dex", "Groves", email = "dex.groves@gmail.com", role = c("aut", "cre"))
-Description: Alternative voting systems in R.
+Description: Implementations of instant runoff voting and single transferable vote.
 Depends:
     R (>= 3.0.0)
 License: MIT
