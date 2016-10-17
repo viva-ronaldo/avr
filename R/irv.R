@@ -1,13 +1,21 @@
 #' Instant runoff voting.
 #'
-#' @param votelist A names list of order-of-preference vote vectors.
+#' @param votes A names list of order-of-preference vote vectors.
 #' @return An IRV object, containing:
 #'
 #'    winner: the winning entry
 #'
 #'    ???: more to come!
 #' @export
-irv <- function(votelist) {
-  invisible()
+irv <- function(votes) {
+  all_entries <- get_all_entries(votes)
+  fps <- get_first_preferences(votes)
+  remaining <- drop_not_included_in_fps(all_entries, fps)
+
+  while(length(remaining) > 1) {
+    fps
+  }
 }
+
+votes <- data
 
