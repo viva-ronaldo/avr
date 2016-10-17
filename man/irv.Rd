@@ -19,4 +19,15 @@ An IRV object, containing:
 \description{
 Instant runoff voting.
 }
+\examples{
+votes <- list(
+  dex = c("Ice Skating", "Unihoc", "Food"),
+  dean = c("Ice Skating", "Unihoc", "Food"),
+  paul = c("Whiskey Tasting", "Established"),
+  james = c("Ice Skating", "Unihoc", "Food")
+)
+
+irv_soln <- irv(votes)
+irv_soln$winner
+}
 

@@ -7,6 +7,16 @@
 #'
 #'    ???: more to come!
 #' @export
+#' @examples
+#' votes <- list(
+#'   dex = c("Ice Skating", "Unihoc", "Food"),
+#'   dean = c("Ice Skating", "Unihoc", "Food"),
+#'   paul = c("Whiskey Tasting", "Established"),
+#'   james = c("Ice Skating", "Unihoc", "Food")
+#' )
+#'
+#' irv_soln <- irv(votes)
+#' irv_soln$winner
 irv <- function(votes) {
   all_entries <- get_all_entries(votes)
   fps <- get_first_preferences(votes)
