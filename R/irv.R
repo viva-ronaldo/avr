@@ -5,6 +5,8 @@
 #'
 #'    winner: the winning entry or entries in the case of a tie
 #'
+#'    nrounds: the number of rounds required to find a winner
+#'
 #'    thru_rounds: list of which entries were in contention at each round
 #'
 #'    eliminations: list of eliminated entries at each round
@@ -43,9 +45,13 @@ irv <- function(votes) {
     thru_rounds[[length(thru_rounds) + 1]] <- remaining
   }
 
-  list(winner = remaining,
-       thru_rounds = thru_rounds,
-       eliminations = get_eliminations(thru_rounds))
+  structure(
+    list(winner = remaining,
+         thru_rounds = thru_rounds,
+         nrounds = length(thru_rounds) - 2,
+         eliminations = get_eliminations(thru_rounds)),
+    class = "IRV"
+  )
 }
 
 get_eliminations <- function(thru_rounds) {
@@ -54,4 +60,22 @@ get_eliminations <- function(thru_rounds) {
     elims[[i]] <- setdiff(thru_rounds[[i]], thru_rounds[[i+1]])
   }
   elims
+}
+
+#' @export
+print.IRV <- function(irv) {
+  win_str <- paste0("Winner:\t", irv$winner,
+                    "\n...in ", irv$nrounds, " rounds.")
+
+  round <- 0
+  rounds_str <- c()
+  for (elimination in irv$eliminations) {
+    if (length(elimination) == 0) elimination <- "None"
+    round_str <- paste0("Dropped in round ", round, ":\t", elimination, "\n")
+    rounds_str <- c(rounds_str, round_str)
+    round <- round + 1
+  }
+
+  message(win_str)
+  message(rounds_str)
 }

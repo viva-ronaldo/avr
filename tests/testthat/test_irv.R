@@ -24,12 +24,12 @@ test_that("First-round ties handled appropriately", {
 votes <- list(
   n1 = c("a", "b", "c", "d"),
   n2 = c("a", "b", "c", "d"),
-  n2 = c("a", "b", "c", "d"),
-  n3 = c("b", "a", "c", "d"),
+  n3 = c("a", "b", "c", "d"),
   n4 = c("b", "a", "c", "d"),
-  n5 = c("c", "b", "c", "d"),
+  n5 = c("b", "a", "c", "d"),
   n6 = c("c", "b", "c", "d"),
-  n6 = c("d", "c", "c", "d")
+  n7 = c("c", "b", "c", "d"),
+  n8 = c("d", "c", "c", "d")
 )
 
 test_that("Through-round reporting is accurate", {
