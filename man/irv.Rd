@@ -14,6 +14,8 @@ An IRV object, containing:
 
    winner: the winning entry or entries in the case of a tie
 
+   nrounds: the number of rounds required to find a winner
+
    thru_rounds: list of which entries were in contention at each round
 
    eliminations: list of eliminated entries at each round
