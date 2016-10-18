@@ -18,9 +18,14 @@
 #' irv_soln <- irv(votes)
 #' irv_soln$winner
 irv <- function(votes) {
+  thru_rounds <- list()
+
   all_entries <- get_all_entries(votes)
   fps <- get_first_preferences(votes)
   remaining <- drop_not_included_in_fps(all_entries, fps)
+
+  thru_rounds[[1]] <- all_entries
+  thru_rounds[[2]] <- remaining
 
   while (length(remaining) > 1) {
     votes <- update_prefs(votes, remaining)
@@ -32,7 +37,10 @@ irv <- function(votes) {
     if (is_tie(remaining, least_common)) break
 
     remaining <- drop_least_common(remaining, least_common)
-}
 
-  list(winner = remaining)
+    thru_rounds[[length(thru_rounds) + 1]] <- remaining
+  }
+
+  list(winner = remaining,
+       thru_rounds = thru_rounds)
 }
