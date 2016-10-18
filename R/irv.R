@@ -64,13 +64,22 @@ get_eliminations <- function(thru_rounds) {
 
 #' @export
 print.IRV <- function(irv) {
-  win_str <- paste0("Winner:\t", irv$winner,
+  winners <- irv$winner
+  if (length(winners) > 1) {
+    winners <- paste(winners, collapse = ", ")
+  }
+
+  win_str <- paste0("Winner:\t", winners,
                     "\n...in ", irv$nrounds, " rounds.")
 
   round <- 0
   rounds_str <- c()
   for (elimination in irv$eliminations) {
-    if (length(elimination) == 0) elimination <- "None"
+    if (length(elimination) == 0) {
+      elimination <- "None"
+    } else if (length(elimination) > 1) {
+      elimination <- paste(elimination, collapse = ", ")
+    }
     round_str <- paste0("Dropped in round ", round, ":\t", elimination, "\n")
     rounds_str <- c(rounds_str, round_str)
     round <- round + 1
