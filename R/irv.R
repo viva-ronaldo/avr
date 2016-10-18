@@ -3,7 +3,7 @@
 #' @param votes A names list of order-of-preference vote vectors.
 #' @return An IRV object, containing:
 #'
-#'    winner: the winning entry
+#'    winner: the winning entry or entries in the case of a tie
 #'
 #'    ???: more to come!
 #' @export
@@ -42,5 +42,14 @@ irv <- function(votes) {
   }
 
   list(winner = remaining,
-       thru_rounds = thru_rounds)
+       thru_rounds = thru_rounds,
+       eliminations = get_eliminations(thru_rounds))
+}
+
+get_eliminations <- function(thru_rounds) {
+  elims <- list()
+  for (i in seq(length(thru_rounds) - 1)) {
+    elims[[i]] <- setdiff(thru_rounds[[i]], thru_rounds[[i+1]])
+  }
+  elims
 }
