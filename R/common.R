@@ -14,6 +14,13 @@ drop_least_common <- function(remaining, lcs) {
   remaining[!remaining %in% lcs]
 }
 
+is_tie <- function(remaining, lcs) {
+  if (all(remaining %in% lcs)) {
+    return(TRUE)
+  }
+  FALSE
+}
+
 update_prefs <- function(votes, remaining) {
   lapply(votes, function(vote) vote[vote %in% remaining])
 }

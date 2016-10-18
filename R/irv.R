@@ -22,15 +22,17 @@ irv <- function(votes) {
   fps <- get_first_preferences(votes)
   remaining <- drop_not_included_in_fps(all_entries, fps)
 
-  while(length(remaining) > 1) {
+  while (length(remaining) > 1) {
     votes <- update_prefs(votes, remaining)
     votes <- drop_empty_votes(votes)
 
     fps <- get_first_preferences(votes)
     least_common <- get_lowest_voted(fps)
 
+    if (is_tie(remaining, least_common)) break
+
     remaining <- drop_least_common(remaining, least_common)
-  }
+}
 
   list(winner = remaining)
 }
