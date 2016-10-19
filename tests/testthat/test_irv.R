@@ -38,7 +38,7 @@ test_that("Through-round reporting is accurate", {
                           c("a", "b", "c"),
                           c("a", "c"),
                           c("a"))
-  expect_equal(irv_soln$thru_rounds, expected_rounds)
+  expect_equal(irv_soln$rem_rounds, expected_rounds)
 })
 
 test_that("Eliminations reporting is accurate", {

@@ -8,7 +8,9 @@
 #'
 #'    nrounds: the number of rounds required to find a winner
 #'
-#'    thru_rounds: list of which entries were in contention at each round
+#'    rem_rounds: list of which entries were in contention at each round
+#'
+#'    fps_rounds: table of first preference votes through each round
 #'
 #'    eliminations: list of eliminated entries at each round
 #' @export
@@ -31,14 +33,12 @@
 #' )
 #' irv(votes)
 irv <- function(votes) {
-  thru_rounds <- list()
-
   all_entries <- get_all_entries(votes)
   fps <- get_first_preferences(votes)
   remaining <- drop_not_included_in_fps(all_entries, fps)
 
-  thru_rounds[[1]] <- all_entries
-  thru_rounds[[2]] <- remaining
+  rem_rounds <- list(all_entries, remaining)
+  fps_rounds <- list(table(fps))
 
   while (length(remaining) > 1) {
     votes <- update_prefs(votes, remaining)
@@ -51,22 +51,24 @@ irv <- function(votes) {
 
     remaining <- drop_least_common(remaining, least_common)
 
-    thru_rounds[[length(thru_rounds) + 1]] <- remaining
+    rem_rounds[[length(rem_rounds) + 1]] <- remaining
+    fps_rounds[[length(fps_rounds) + 1]] <- table(fps)
   }
 
   structure(
     list(winner = remaining,
-         thru_rounds = thru_rounds,
-         nrounds = length(thru_rounds) - 2,
-         eliminations = get_eliminations(thru_rounds)),
+         rem_rounds = rem_rounds,
+         fps_rounds = fps_rounds,
+         nrounds = length(rem_rounds) - 2,
+         eliminations = get_eliminations(rem_rounds)),
     class = "IRV"
   )
 }
 
-get_eliminations <- function(thru_rounds) {
+get_eliminations <- function(rem_rounds) {
   elims <- list()
-  for (i in seq(length(thru_rounds) - 1)) {
-    elims[[i]] <- setdiff(thru_rounds[[i]], thru_rounds[[i+1]])
+  for (i in seq(length(rem_rounds) - 1)) {
+    elims[[i]] <- setdiff(rem_rounds[[i]], rem_rounds[[i+1]])
   }
   elims
 }

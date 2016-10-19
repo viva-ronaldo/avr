@@ -17,7 +17,9 @@ An IRV object, containing:
 
    nrounds: the number of rounds required to find a winner
 
-   thru_rounds: list of which entries were in contention at each round
+   rem_rounds: list of which entries were in contention at each round
+
+   fps_rounds: table of first preference votes through each round
 
    eliminations: list of eliminated entries at each round
 }
