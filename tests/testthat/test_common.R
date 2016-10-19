@@ -1,4 +1,4 @@
-context("Instant common utilities")
+context("Common utilities")
 
 votes <- list(
   dex = c("Ice Skating", "Unihoc", "Food"),

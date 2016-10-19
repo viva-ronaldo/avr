@@ -7,7 +7,8 @@
 irv(votes)
 }
 \arguments{
-\item{votes}{A names list of order-of-preference vote vectors.}
+\item{votes}{A list of order-of-preference vote vectors, or a list of ballot
+objects.}
 }
 \value{
 An IRV object, containing:
@@ -31,7 +32,15 @@ votes <- list(
   james = c("Ice Skating", "Unihoc", "Food")
 )
 
-irv_soln <- irv(votes)
-irv_soln$winner
+irv(votes)
+
+map <- c("e", "f", "i", "u", "w")
+votes <- list(
+  ballot(0, 3, 1, 2, 0, map = map),
+  ballot(0, 3, 1, 2, 0, map = map),
+  ballot(2, 0, 0, 0, 1, map = map),
+  ballot(0, 3, 1, 2, 0, map = map)
+)
+irv(votes)
 }
 

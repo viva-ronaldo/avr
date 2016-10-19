@@ -1,6 +1,7 @@
 #' Instant runoff voting.
 #'
-#' @param votes A names list of order-of-preference vote vectors.
+#' @param votes A list of order-of-preference vote vectors, or a list of ballot
+#' objects.
 #' @return An IRV object, containing:
 #'
 #'    winner: the winning entry or entries in the case of a tie
@@ -19,8 +20,16 @@
 #'   james = c("Ice Skating", "Unihoc", "Food")
 #' )
 #'
-#' irv_soln <- irv(votes)
-#' irv_soln$winner
+#' irv(votes)
+#'
+#' map <- c("e", "f", "i", "u", "w")
+#' votes <- list(
+#'   ballot(0, 3, 1, 2, 0, map = map),
+#'   ballot(0, 3, 1, 2, 0, map = map),
+#'   ballot(2, 0, 0, 0, 1, map = map),
+#'   ballot(0, 3, 1, 2, 0, map = map)
+#' )
+#' irv(votes)
 irv <- function(votes) {
   thru_rounds <- list()
 
