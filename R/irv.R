@@ -50,7 +50,7 @@ irv <- function(votes) {
     votes <- drop_empty_votes(votes)
 
     fps <- get_first_preferences(votes)
-    least_common <- get_lowest_voted(fps)
+    least_common <- get_loser(votes)
 
     if (is_tie(remaining, least_common)) break
 
@@ -78,7 +78,7 @@ get_eliminations <- function(rem_rounds) {
   elims
 }
 
-#' @export
+#' @export`
 print.IRV <- function(irv) {
   winners <- irv$winner
   if (length(winners) > 1) {
