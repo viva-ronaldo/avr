@@ -21,6 +21,21 @@ is_tie <- function(remaining, lcs) {
   FALSE
 }
 
+any_has_majority <- function(fps) {
+  tab <- table(fps)
+  threshold <- floor((length(fps) / 2) + 1)
+  if (max(tab) >= threshold) {
+    return(TRUE)
+  }
+  FALSE
+}
+
+#' From stackoverflow.com/questions/2547402
+get_mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
 update_prefs <- function(votes, remaining) {
   lapply(votes, function(vote) vote[vote %in% remaining])
 }

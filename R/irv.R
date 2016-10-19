@@ -41,6 +41,11 @@ irv <- function(votes) {
   fps_rounds <- list(table(fps))
 
   while (length(remaining) > 1) {
+    if (any_has_majority(fps)) {
+      remaining <- get_mode(fps)
+      break
+    }
+
     votes <- update_prefs(votes, remaining)
     votes <- drop_empty_votes(votes)
 
