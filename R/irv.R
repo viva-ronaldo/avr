@@ -78,7 +78,7 @@ get_eliminations <- function(rem_rounds) {
   elims
 }
 
-#' @export`
+#' @export
 print.IRV <- function(irv) {
   winners <- irv$winner
   if (length(winners) > 1) {
