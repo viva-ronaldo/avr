@@ -58,3 +58,13 @@ test_that("get_lowest_voted returns as expected", {
   lowest <- get_lowest_voted(fps)
   expect_equal(sort(lowest), c("Theatre", "Whiskey Tasting"))
 })
+
+test_that("Mode functions behave", {
+  vec <- c(1, 1, 1, 2, 2, 3)
+  expect_equal(get_mode(vec), 1)
+  expect_equal(get_antimode(vec), 3)
+
+  vec <- c(1, 1, 1, 2, 2, 3, 3, 3, 4, 4)
+  expect_equal(get_mode(vec), c(1, 3))
+  expect_equal(get_antimode(vec), c(2, 4))
+})

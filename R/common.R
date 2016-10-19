@@ -33,7 +33,16 @@ any_has_majority <- function(fps) {
 #' From stackoverflow.com/questions/2547402
 get_mode <- function(x) {
   ux <- unique(x)
-  ux[which.max(tabulate(match(x, ux)))]
+  ux[all_which_fn(tabulate(match(x, ux)), max)]
+}
+
+get_antimode <- function(x) {
+  ux <- unique(x)
+  ux[all_which_fn(tabulate(match(x, ux)), min)]
+}
+
+all_which_fn <- function(x, fn) {
+  which(x == fn(x))
 }
 
 update_prefs <- function(votes, remaining) {
