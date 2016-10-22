@@ -4,24 +4,29 @@
 \alias{irv}
 \title{Instant runoff voting.}
 \usage{
-irv(votes)
+irv(votes, tiebreak = "all")
 }
 \arguments{
 \item{votes}{A list of order-of-preference vote vectors, or a list of ballot
 objects.}
+
+\item{tiebreak}{String informing tiebreak behavior.
+\describe{
+  \item{"all"}{All tied losers will be dropped}
+  \item{"random"}{Tied losers will be dropped randomly}
+  \item{"nested"}{Tied losers will be broken by running a nested IRV only
+                  considering votes for the losers.}
+}}
 }
 \value{
 An IRV object, containing:
-
-   winner: the winning entry or entries in the case of a tie
-
-   nrounds: the number of rounds required to find a winner
-
-   rem_rounds: list of which entries were in contention at each round
-
-   fps_rounds: table of first preference votes through each round
-
-   eliminations: list of eliminated entries at each round
+  \describe{
+    \item{winner:}{the winning entry or entries in the case of a tie}
+    \item{nrounds:}{the number of rounds required to find a winner}
+    \item{rem_rounds:}{list of which entries were in contention at each round}
+    \item{fps_rounds:}{table of first preference votes through each round}
+    \item{eliminations:}{list of eliminated entries at each round}
+  }
 }
 \description{
 Instant runoff voting.

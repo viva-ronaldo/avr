@@ -1,4 +1,16 @@
-get_loser <- function(votes) {
+get_loser_random <- function(votes) {
+  fps <- get_first_preferences(votes)
+  losers <- get_antimode(fps)
+  sample(losers, 1)
+}
+
+get_loser_all <- function(votes) {
+  fps <- get_first_preferences(votes)
+  losers <- get_antimode(fps)
+  losers
+}
+
+get_loser_nested <- function(votes) {
   # Find if lowest on FPs is untied
   # If tied, move everyone NOT tied up a preference IF POSSIBLE
   # If no more preferences to go, return the tie
@@ -17,7 +29,7 @@ get_loser <- function(votes) {
   }
   # Else recurse the reduced voter data until convergence
   new_votes <- drop_empty_votes(new_votes)
-  get_loser(new_votes)
+  get_loser_nested(new_votes)
 }
 
 drop_non_losers <- function(votes, losers) {

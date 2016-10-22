@@ -2,17 +2,22 @@
 #'
 #' @param votes A list of order-of-preference vote vectors, or a list of ballot
 #' objects.
+#' @param tiebreak String informing tiebreak behavior.
+#'   \describe{
+#'     \item{"all"}{All tied losers will be dropped}
+#'     \item{"random"}{Tied losers will be dropped randomly}
+#'     \item{"nested"}{Tied losers will be broken by running a nested IRV only
+#'                     considering votes for the losers.}
+#'   }
+#'
 #' @return An IRV object, containing:
-#'
-#'    winner: the winning entry or entries in the case of a tie
-#'
-#'    nrounds: the number of rounds required to find a winner
-#'
-#'    rem_rounds: list of which entries were in contention at each round
-#'
-#'    fps_rounds: table of first preference votes through each round
-#'
-#'    eliminations: list of eliminated entries at each round
+#'   \describe{
+#'     \item{winner:}{the winning entry or entries in the case of a tie}
+#'     \item{nrounds:}{the number of rounds required to find a winner}
+#'     \item{rem_rounds:}{list of which entries were in contention at each round}
+#'     \item{fps_rounds:}{table of first preference votes through each round}
+#'     \item{eliminations:}{list of eliminated entries at each round}
+#'   }
 #' @export
 #' @examples
 #' votes <- list(
@@ -32,7 +37,9 @@
 #'   ballot(0, 3, 1, 2, 0, map = map)
 #' )
 #' irv(votes)
-irv <- function(votes) {
+irv <- function(votes, tiebreak = "all") {
+  get_loser <- get_loser_fn(tiebreak)
+
   all_entries <- get_all_entries(votes)
   fps <- get_first_preferences(votes)
   remaining <- drop_not_included_in_fps(all_entries, fps)
@@ -68,6 +75,12 @@ irv <- function(votes) {
          eliminations = get_eliminations(rem_rounds)),
     class = "IRV"
   )
+}
+
+get_loser_fn <- function(tiebreak) {
+  if (tiebreak == "all") return(get_loser_all)
+  if (tiebreak == "random") return(get_loser_random)
+  if (tiebreak == "nested") return(get_loser_nested)
 }
 
 get_eliminations <- function(rem_rounds) {

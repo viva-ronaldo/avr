@@ -41,7 +41,8 @@ irv_soln <- irv(
     m17,
     m18,
     m19
-  )
+  ),
+  tiebreak = "nested"
 )
 
 test_that("Reasonable-size data IRV winner is correct", {
