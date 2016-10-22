@@ -1,6 +1,9 @@
 get_loser_random <- function(votes) {
   fps <- get_first_preferences(votes)
   losers <- get_antimode(fps)
+  if (length(losers) == 1) {
+    return(losers)
+  }
   sample(losers, 1)
 }
 
