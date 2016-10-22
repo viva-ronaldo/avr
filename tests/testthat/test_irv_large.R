@@ -21,27 +21,8 @@ m18 <- ballot(12,  5,  4,  1, 13,  6, 14, 11,  7,  2,  8, 10,  9,  3)
 m19 <- ballot( 9,  6,  8,  4, 13, 12, 11,  9,  3,  2, 10,  5,  7,  1)
 
 irv_soln <- irv(
-  list(
-    m01,
-    m02,
-    m03,
-    m04,
-    m05,
-    m06,
-    m07,
-    m08,
-    m09,
-    m10,
-    m11,
-    m12,
-    m13,
-    m14,
-    m15,
-    m16,
-    m17,
-    m18,
-    m19
-  ),
+  list(m01, m02, m03, m04, m05, m06, m07, m08, m09, m10, m11, m12, m13, m14,
+       m15, m16, m17, m18, m19),
   tiebreak = "nested"
 )
 
@@ -51,4 +32,28 @@ test_that("Reasonable-size data IRV winner is correct", {
 
 test_that("Reasonable-size data IRV nrounds is correct", {
   expect_equal(irv_soln$nrounds, 12)
+})
+
+irv_soln <- irv(
+  list(m01, m02, m03, m04, m05, m06, m07, m08, m09, m10, m11, m12, m13, m14,
+       m15, m16, m17, m18, m19),
+  tiebreak = "all"
+)
+
+test_that("Reasonable-size data IRV winner is correct, tiebreak all", {
+  expect_equal(irv_soln$winner, 3)
+})
+
+test_that("Reasonable-size data IRV nrounds is correct, tiebreak all", {
+  expect_equal(irv_soln$nrounds, 3)
+})
+
+irv_soln <- irv(
+  list(m01, m02, m03, m04, m05, m06, m07, m08, m09, m10, m11, m12, m13, m14,
+       m15, m16, m17, m18, m19),
+  tiebreak = "random"
+)
+
+test_that("Reasonable-size data IRV runs, tiebreak random", {
+  expect_is(irv_soln$winner, "integer")
 })
