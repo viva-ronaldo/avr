@@ -38,3 +38,13 @@ get_loser_nested <- function(votes) {
 drop_non_losers <- function(votes, losers) {
   lapply(votes, function(vote) vote[vote %in% losers])
 }
+
+
+get_stv_loser <- function(fps, weights) {
+  losers <- fps[weights == min(weights)]
+  # Drop randomly for now
+  if (length(losers) == 1) {
+    return(losers)
+  }
+  sample(losers, 1)
+}
