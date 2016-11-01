@@ -43,9 +43,14 @@ stv <- function(votes, nseats) {
   weights <- rep(1, nvotes)
   quota <- droop_quota(nvotes, nseats)
 
+
   while (length(winners) < nseats) {
     fps <- get_first_preferences(votes)
     through_this_rnd <- get_above_quota(fps, quota, weights)
+
+    if (length(fps) == 0) {
+      break
+    }
 
     if (length(through_this_rnd) > 0) {
       # Move everyone's votes up and discount weights for each winner
@@ -59,7 +64,7 @@ stv <- function(votes, nseats) {
       # Have to update quota for any dropped votes
       votes <- remove_prefs(votes, through_this_rnd)
     } else {
-      # Eliminate someone, update votes with no change to weightsc
+      # Eliminate someone, update votes with no change to weights
       loser <- get_stv_loser(fps, weights)
       votes <- remove_prefs(votes, loser)
     }
@@ -68,7 +73,7 @@ stv <- function(votes, nseats) {
   }
 
   structure(
-    list(winner = winners),
+    list(winners = winners),
     class = "STV"
   )
 }
@@ -78,7 +83,7 @@ get_above_quota <- function(fps, quota, weights) {
   ufps <- unique(fps)
   sum_wts <- sapply(ufps, function(fp) sum(weights[fps == fp]))
 
-  ufps[sum_wts > quota]
+  ufps[sum_wts >= quota]
 }
 
 #' Get the number of votes for a given candidate
