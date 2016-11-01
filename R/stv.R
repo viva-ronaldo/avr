@@ -27,7 +27,7 @@
 #'   james = c("Ice Skating", "Unihoc", "Food")
 #' )
 #'
-#' stv(votes)
+#' stv(votes, 2)
 #'
 #' map <- c("e", "f", "i", "u", "w")
 #' votes <- list(
@@ -36,8 +36,8 @@
 #'   ballot(2, 0, 0, 0, 1, map = map),
 #'   ballot(0, 3, 1, 2, 0, map = map)
 #' )
-#' stv(votes)
-stv <- function(votes, nseats, tiebreak = "all") {
+#' stv(votes, 2)
+stv <- function(votes, nseats) {
   winners <- c()
   nvotes <- length(votes)
   weights <- rep(1, nvotes)
@@ -55,31 +55,26 @@ stv <- function(votes, nseats, tiebreak = "all") {
         transfer_ratio <- excess / nvotes
         weights[fps == winner] <- weights[fps == winner] * transfer_ratio
       }
+      winners <- c(winners, through_this_rnd)
       # Have to update quota for any dropped votes
       votes <- remove_prefs(votes, through_this_rnd)
-      votes <- drop_empty_votes(votes)
-      quota <- droop_quota(length(votes), nseats)
     } else {
       # Eliminate someone, update votes with no change to weightsc
-      least_common <- get_stv_loser(fps, weights)
-      votes <- remove_prefs(votes, winners_this_rnd)
-      votes <- drop_empty_votes(votes)
-      quota <- droop_quota(length(votes), nseats)
+      loser <- get_stv_loser(fps, weights)
+      votes <- remove_prefs(votes, loser)
     }
+    votes <- drop_empty_votes(votes)
+    quota <- droop_quota(length(votes), nseats)
   }
 
   structure(
-    list(winner = winners,
-         rem_rounds = rem_rounds,
-         fps_rounds = fps_rounds,
-         nrounds = length(rem_rounds) - 2,
-         eliminations = get_eliminations(rem_rounds)),
+    list(winner = winners),
     class = "STV"
   )
 }
 
 #' Return the names of the candidates who are over the current quota
-get_above_quota <- function(fps, quota) {
+get_above_quota <- function(fps, quota, weights) {
   ufps <- unique(fps)
   sum_wts <- sapply(ufps, function(fp) sum(weights[fps == fp]))
 
@@ -89,4 +84,15 @@ get_above_quota <- function(fps, quota) {
 #' Get the number of votes for a given candidate
 get_nvotes <- function(fps, candidate, weights) {
   sum(weights[fps == candidate])
+}
+
+#' Return the lowest-voted candidate by FPs, resolving ties randomly
+get_stv_loser <- function(fps, weights) {
+  ufps <- unique(fps)
+  sum_wts <- sapply(ufps, function(fp) sum(weights[fps == fp]))
+  losers <- ufps[sum_wts == min(sum_wts)]
+  if (length(losers) == 1) {
+    return(losers)
+  }
+  sample(losers, 1)
 }
