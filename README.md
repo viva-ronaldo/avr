@@ -51,7 +51,7 @@ votes <- c(
 )
 
 stv(votes, 3)
-# An avr irv object.
+# An avr stv object.
 # Winners:
 # Round 1:        Chocolate
 # Round 2:        Orange
