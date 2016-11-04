@@ -49,6 +49,10 @@ update_prefs <- function(votes, remaining) {
   lapply(votes, function(vote) vote[vote %in% remaining])
 }
 
+remove_prefs <- function(votes, exclusions) {
+  lapply(votes, function(vote) vote[!vote %in% exclusions])
+}
+
 drop_empty_votes <- function(votes) {
   votes[sapply(votes, function(vote) length(vote) > 0)]
 }

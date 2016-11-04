@@ -93,6 +93,7 @@ get_eliminations <- function(rem_rounds) {
 
 #' @export
 print.IRV <- function(irv) {
+  message("An avr irv object.")
   winners <- irv$winner
   if (length(winners) > 1) {
     winners <- paste(winners, collapse = ", ")
