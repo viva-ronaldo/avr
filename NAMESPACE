@@ -3,3 +3,4 @@
 S3method(print,IRV)
 export(ballot)
 export(irv)
+export(stv)

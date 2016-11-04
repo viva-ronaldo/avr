@@ -2,21 +2,12 @@
 #'
 #' @param votes A list of order-of-preference vote vectors, or a list of ballot
 #' objects.
-#' @param tiebreak String informing tiebreak behavior.
-#'   \describe{
-#'     \item{"all"}{All tied losers will be dropped}
-#'     \item{"random"}{Tied losers will be dropped randomly}
-#'     \item{"nested"}{Tied losers will be broken by running a nested STV only
-#'                     considering votes for the losers.}
-#'   }
+#' @param nseats How many seats to fill.
 #'
 #' @return An STV object, containing:
 #'   \describe{
-#'     \item{winner:}{the winning entry or entries in the case of a tie}
-#'     \item{nrounds:}{the number of rounds required to find a winner}
-#'     \item{rem_rounds:}{list of which entries were in contention at each round}
-#'     \item{fps_rounds:}{table of first preference votes through each round}
-#'     \item{eliminations:}{list of eliminated entries at each round}
+#'     \item{winner:}{the winning entries in order of preference}
+#'     \item{More to come!}{}
 #'   }
 #' @export
 #' @examples
