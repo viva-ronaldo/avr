@@ -95,7 +95,7 @@ get_stv_loser <- function(fps, weights) {
 
 #' @export
 print.STV <- function(stv) {
-  message("An avr irv object.")
+  message("An avr stv object.")
   winners <- stv$winners
   message("Winners:")
   for (i in seq_along(winners)) {
