@@ -35,4 +35,3 @@ test_that("Wikipedia STV example resolves correctly", {
   stv_soln <- stv(votes, 3)
   expect_equal(stv_soln$winners, c("Choc", "Orange", "Strawberry"))
 })
-

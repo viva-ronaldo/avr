@@ -15,7 +15,7 @@ objects.}
 \value{
 An STV object, containing:
   \describe{
-    \item{winner:}{the winning entries in order of preference}
+    \item{winners:}{the winning entries in order of preference}
     \item{More to come!}{}
   }
 }

@@ -6,7 +6,7 @@
 #'
 #' @return An STV object, containing:
 #'   \describe{
-#'     \item{winner:}{the winning entries in order of preference}
+#'     \item{winners:}{the winning entries in order of preference}
 #'     \item{More to come!}{}
 #'   }
 #' @export
@@ -91,4 +91,16 @@ get_stv_loser <- function(fps, weights) {
     return(losers)
   }
   sample(losers, 1)
+}
+
+#' @export
+print.STV <- function(stv) {
+  message("An avr irv object.")
+  winners <- stv$winners
+  message("Winners:")
+  for (i in seq_along(winners)) {
+    str <- paste0("Round ", i, ":\t", winners[i])
+    message(str)
+  }
+  invisible()
 }
