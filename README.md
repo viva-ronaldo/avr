@@ -3,58 +3,55 @@ Alternative voting systems in R.
 
 Currently supports [instant runoff voting](https://en.wikipedia.org/wiki/Instant-runoff_voting), and [single transferable vote](https://en.wikipedia.org/wiki/Single_transferable_vote).
 
+Votes can be provided as a vector of lists of preferences, in numbered ballot card format, or read from csv:
 
-# IRV
-```R
+```r
 votes <- list(
   n1 = c("a", "b", "c", "d"),
   n2 = c("a", "b", "c", "d"),
-  n3 = c("a", "b", "c", "d"),
+  n3 = c("a", "b", "d", "c"),
   n4 = c("b", "a", "c", "d"),
   n5 = c("b", "a", "c", "d"),
-  n6 = c("c", "b", "c", "d"),
-  n7 = c("c", "b", "c", "d"),
-  n8 = c("d", "c", "c", "d")
+  n6 = c("c", "b", "a", "d"),
+  n7 = c("c", "b", "a", "d"),
+  n8 = c("d", "c", "a", "b"),
+  n9 = c("d", "a", "b", "c")
 )
 
-irv(votes)
-# An avr irv object.
-# Winner: a
-# ...in 3 rounds.
-# Dropped in round 0:     None
-# Dropped in round 1:     d
-# Dropped in round 2:     b
-# Dropped in round 3:     c
-
-# Or using a ballot card data format
-map <- c("a", "b", "c", "d", "e")
+map <- c("a", "b", "c", "d")
 votes <- list(
-  ballot(0, 3, 1, 2, 0, map = map),
-  ballot(0, 3, 1, 2, 0, map = map),
-  ballot(2, 0, 0, 0, 1, map = map),
-  ballot(0, 3, 1, 2, 0, map = map)
+  ballot(1, 2, 3, 4, map = map),
+  ballot(1, 2, 3, 4, map = map),
+  ballot(1, 2, 4, 3, map = map),
+  ballot(2, 1, 3, 4, map = map),
+  ballot(2, 1, 3, 4, map = map),
+  ballot(3, 2, 1, 4, map = map),
+  ballot(3, 2, 1, 4, map = map),
+  ballot(3, 4, 2, 1, map = map),
+  ballot(2, 3, 4, 1, map = map)
 )
-irv(votes)
+
+votes <- read_votes_from_csv('my_votes_table.csv')
 ```
 
-# STV example from wikipedia
-```R
-replist <- function(arg, times) lapply(seq(times), function(i) arg)
+STV can be run as a single iteration, or, because elections with small numbers of votes often involve ties, in ensemble mode, with ties resolved randomly:
 
-votes <- c(
-  replist("Orange",                     4),
-  replist(c("Pear", "Orange"),          2),
-  replist(c("Chocolate", "Strawberry"), 8),
-  replist(c("Chocolate", "Candy"),      4),
-  replist("Strawberry",                 1),
-  replist("Candy",                      1)
-)
-
-stv(votes, 3)
+```
+stv(votes, 2)  #random resolution of ties, e.g.
 # An avr stv object.
 # Winners:
-# Round 1:        Chocolate
-# Round 2:        Orange
-# Round 3:        Strawberry
+# Round 1:        a
+# Round 2:        c
 
+ensemble_stv(votes, 2, nensemble=10)
+# 3 possible pathways
+# Winners:
+#   candidate elected_pct
+# 1         a         100
+# 2         c          62
+# 3         b          38
 ```
+
+Use `r report = TRUE` to output a nicely formatted report showing the round-by-round election results and the vote transfers that occurred.
+
+**TODO** merge stv and ensemble_stv into one function

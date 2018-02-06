@@ -50,4 +50,3 @@ votes <- list(
 )
 irv(votes)
 }
-

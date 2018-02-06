@@ -29,101 +29,149 @@
 #'   ballot(0, 3, 1, 2, 0, map = map)
 #' )
 #' stv(votes, 2)
-stv <- function(votes, nseats, verbose=FALSE, getMatrix=FALSE) {
-  winners <- c()
-  out <- c()
-  nvotes <- length(votes)
-  weights <- rep(1, nvotes)
-  
-  quota <- droop_quota(nvotes, nseats)
-  if (verbose) message('Quota is ',quota)
-  
-  running <- get_all_entries(votes)
-  if (getMatrix) transfer_matrix <- data.frame() else transfer_matrix <- NULL
-
-  rnd_num <- 1
-  while (length(winners) < nseats) {
-    if (verbose) message(sprintf('Round %i',rnd_num))
-    rnd_num <- rnd_num + 1
-    fps <- get_first_preferences(votes)
-    through_this_rnd <- get_above_quota(fps, quota, weights)
-    stillIn <- setdiff(running, union(winners, out))
-    if (verbose) print_current_table(stillIn, fps, weights)
+stv <- function(votes, nseats, verbose=FALSE, 
+                getMatrix=FALSE, 
+                report=FALSE, report_path=ifelse(report,'stv_single_report.html',NULL),
+                getTable=ifelse(report,TRUE,FALSE)) {
     
-    if (length(fps) == 0) {
-      break
+    if (report) {
+        #Need ggplot2, reshape2, kableExtra, formattable, circlize to make report
+        if (length(intersect(c('ggplot2','reshape2','kableExtra','formattable','circlize'),
+                             row.names(installed.packages()))) < 5) report <- FALSE
+        if (report) getMatrix <- TRUE
     }
     
-    if (length(stillIn) <= (nseats - length(winners))) {
-        # Everyone left is in
-        winners <- c(winners, stillIn)
-        if (verbose) message('Rest are in')
-        break
-    }
-
-    if (length(through_this_rnd) > 0) {
+    winners <- c()
+    out <- c()
+    nballots <- length(votes)
+    nvotes <- nballots
+    weights <- rep(1, nvotes)
+    quota <- droop_quota(nvotes, nseats)
+    if (verbose) message('Quota is ',quota)
+    running <- get_all_entries(votes)
+    if (getMatrix) transfer_matrix <- data.frame() else transfer_matrix <- NULL
+    if (getTable) count_table <- data.frame(Candidate=running) else count_table <- NULL
+    can_drop_bottom <- 1
+    
+    if (getTable | verbose) rnd_num <- 1
+    while (length(winners) < nseats) {
+        if (verbose) message(sprintf('Round %i',rnd_num))
+        fps <- get_first_preferences(votes)
+        through_this_rnd <- get_above_quota(fps, quota, weights)
+        stillIn <- setdiff(running, union(winners, out))
+        if (verbose) print(get_current_table(stillIn, fps, weights))
+        if (getTable & can_drop_bottom == 1) {
+            count_table <- merge(count_table, get_current_table(stillIn, fps, weights), 
+                                 by='Candidate', all.x=T)
+            names(count_table)[ncol(count_table)] <- paste0('Round_',rnd_num)
+            rnd_num <- rnd_num + 1
+        } else if (verbose) {
+            rnd_num <- rnd_num + 1  
+        }
         
-        #At end, may need to just take top few of remaining
-        if (length(winners) + length(through_this_rnd) > nseats) {
-            howManyIn <- nseats - length(winners)
-            votesEach <- c()
-            for (winner in through_this_rnd) {
-                votesEach <- c(votesEach, get_nvotes(fps, winner, weights))
+        if (length(fps) == 0) {
+            break
+        }
+        if (length(stillIn) <= (nseats - length(winners))) {
+            # Everyone left is in
+            winners <- c(winners, stillIn)
+            if (verbose) message('Rest are in')
+            break
+        }
+        
+        # Check for winner, unless we need to finish a multiple elimination at bottom
+        if (can_drop_bottom == 1 & length(through_this_rnd) > 0) {
+            
+            #At end, may need to just take top few of remaining
+            if (length(winners) + length(through_this_rnd) > nseats) {
+                howManyIn <- nseats - length(winners)
+                votesEach <- c()
+                for (winner in through_this_rnd) {
+                    votesEach <- c(votesEach, get_nvotes(fps, winner, weights))
+                }
+                if (verbose) message(votesEach)
+                if (verbose) print(order(votesEach,decreasing=TRUE)[1:howManyIn])
+                #reduce to the number of free seats
+                through_this_rnd <- through_this_rnd[order(votesEach,decreasing=TRUE)[1:howManyIn]]
             }
-            if (verbose) print(votesEach)
-            if (verbose) print(order(votesEach,decreasing=TRUE)[1:howManyIn])
-            #reduce to the number of free seats
-            through_this_rnd <- through_this_rnd[order(votesEach,decreasing=TRUE)[1:howManyIn]]
+            
+            # Move everyone's votes up and discount weights for each winner
+            votesForTransfer <- 0
+            for (winner in through_this_rnd) {
+                nvotes <- get_nvotes(fps, winner, weights)
+                excess <- round(nvotes - quota, 3) #avoid precision errors
+                transfer_ratio <- excess / nvotes
+                weights[fps == winner] <- weights[fps == winner] * transfer_ratio
+                
+                if (verbose) message(sprintf('-> %s elected with %g (%g to transfer)\n',
+                                             winner,nvotes,excess))
+                votesForTransfer <- votesForTransfer + excess
+                cand_out <- winner
+            }
+            winners <- c(winners, through_this_rnd)
+            votes <- remove_prefs(votes, through_this_rnd)
+        } else {
+            # Eliminate someone, update votes with no change to weights
+            if (length(stillIn) > 2) {
+                can_drop_bottom <- get_number_to_eliminate(rev(get_current_table(stillIn, fps, weights)$votes), quota)
+                #if (can_drop_bottom > 1) { message(sprintf('Can drop bottom %i',can_drop_bottom)) }
+            }
+            loser <- get_stv_loser(fps, stillIn, weights)
+            votesForTransfer <- get_nvotes(fps, loser, weights)
+            if (verbose) message(sprintf('-> %s eliminated with %g\n',loser,votesForTransfer))
+            cand_out <- loser
+            votes <- remove_prefs(votes, loser)
+            out <- c(out, loser)
+            # Check if we can safely eliminate more: done only to simplify the count table
+            #TODO what was this?
         }
         
-      # Move everyone's votes up and discount weights for each winner
-      votesForTransfer <- 0
-      for (winner in through_this_rnd) {
-        nvotes <- get_nvotes(fps, winner, weights)
-        excess <- round(nvotes - quota, 3) #avoid precision errors
-        transfer_ratio <- excess / nvotes
-        weights[fps == winner] <- weights[fps == winner] * transfer_ratio
-
-        if (verbose) message(sprintf('-> %s elected with %g (%g to transfer)\n',
-                                     winner,nvotes,excess))
-        votesForTransfer <- votesForTransfer + excess
-        cand_out <- winner
-      }
-      winners <- c(winners, through_this_rnd)
-      votes <- remove_prefs(votes, through_this_rnd)
-    } else {
-      # Eliminate someone, update votes with no change to weights
-      loser <- get_stv_loser(fps, stillIn, weights)
-      votesForTransfer <- get_nvotes(fps, loser, weights)
-      if (verbose) message(sprintf('-> %s eliminated with %g\n',loser,votesForTransfer))
-      cand_out <- loser
-      votes <- remove_prefs(votes, loser)
-      out <- c(out, loser)
+        if (getMatrix) {
+            stillIn <- setdiff(running, union(winners,out)) #update early, for output
+            prevVotes <- vector('integer', length=length(stillIn))
+            for (i in seq(length(stillIn))) {
+                prevVotes[i] <- get_nvotes(fps, stillIn[i], weights)
+            }
+        }
+        
+        vw <- drop_empty_votes_and_update_weights(votes, weights) #keep their lengths consistent
+        votes <- vw[[1]]
+        weights <- vw[[2]]
+        
+        if (getMatrix) transfer_matrix <- add_row_to_transfer_matrix(votes,weights,running,
+                                                                     stillIn,cand_out,prevVotes,
+                                                                     votesForTransfer,
+                                                                     verbose,transfer_matrix)
     }
-    
+    if (getTable) count_table <- finalise_count_table(count_table, winners)
     if (getMatrix) {
-        stillIn <- setdiff(running, union(winners,out))  #update early, for output
-        prevVotes <- vector('integer', length=length(stillIn))
-        for (i in seq(length(stillIn))) {
-            prevVotes[i] <- get_nvotes(fps, stillIn[i], weights)
+        for (cand in setdiff(running, row.names(transfer_matrix))) {
+            #print(paste('Blank for',cand))
+            transfer_matrix[cand, ] <- NA
         }
     }
     
-    vw <- drop_empty_votes_and_update_weights(votes, weights) #keep their lengths consistent
-    votes <- vw[[1]]
-    weights <- vw[[2]]
+    stv_single_results <- structure(
+        list(nballots = nballots,
+             nseats = nseats,
+             quota = quota,
+             winners = winners,
+             transfer_matrix = transfer_matrix,
+             count_table = count_table),
+        class = "STV"
+    )
     
-    if (getMatrix) transfer_matrix <- add_row_to_transfer_matrix(votes,weights,running,
-                                                                 stillIn,cand_out,prevVotes,
-                                                                 votesForTransfer,
-                                                                 verbose,transfer_matrix)
-  }
-
-  structure(
-    list(winners = winners,
-         transfer_matrix = transfer_matrix),
-    class = "STV"
-  )
+    if (report) {
+        saveRDS(stv_single_results, file='tmp_stv_single_results.rds')
+        report_text <- get_report_text(ensemble=FALSE)
+        cat(sprintf(report_text, 'tmp_stv_single_results.rds'), file='tmp_stv_single_report.rmd')
+        capture.output(suppressMessages(rmarkdown::render('tmp_stv_single_report.rmd', 
+                                                          output_file=report_path, quiet=TRUE)))
+        system('rm tmp_stv_single_results.rds tmp_stv_single_report.rmd')
+        message(sprintf('Report written to %s',report_path))
+    }
+    
+    return(stv_single_results)
 }
 
 #' Return the names of the candidates who are over the current quota
@@ -148,16 +196,16 @@ get_stv_loser <- function(fps,stillIn,weights) {
   return(sample(losers, 1))
 }
 
-
-#' For verbose output, print the current votes table
-print_current_table <- function(stillIn, fps, weights) {
+#' For verbose output, print the current votes leaderboard
+get_current_table <- function(stillIn, fps, weights) {
     fpframe <- data.frame()
     for (p in stillIn) {
-        fpframe <- rbind(fpframe,
-                         data.frame(cand=p, votes=get_nvotes(fps,p,weights)))
+        fpframe <- rbind(fpframe, data.frame(Candidate=p, 
+                                             votes=round(get_nvotes(fps,p,weights),2)))
     }
-    print(fpframe[order(fpframe$votes, decreasing=TRUE), ])
+    fpframe[order(fpframe$votes, decreasing=TRUE), ]
 }
+
 
 #' Add an entry to the transferMatrix, for cand_out
 add_row_to_transfer_matrix <- function(votes,weights,running,stillIn,cand_out,
@@ -189,6 +237,32 @@ drop_empty_votes_and_update_weights <- function(votes, weights) {
     list(votes[keepInds], weights[keepInds])
 }
 
+#' Return the number of bottom candidates that can be dropped in this round
+get_number_to_eliminate <- function(ordered_current_votes, quota) {
+    number_still_in <- length(ordered_current_votes)
+    could_drop_group <- sapply(seq(2,number_still_in-1), 
+                               function(x) sum(ordered_current_votes[1:x]) < quota &
+                                   sum(ordered_current_votes[1:x]) < ordered_current_votes[x+1])
+    #print(could_drop_group)
+    if (sum(could_drop_group) >= 1) {
+        return(min(which(could_drop_group)) + 1)
+    } else {
+        return(1)
+    }
+}
+
+#' Prepare the count table for viewing
+finalise_count_table <- function(count_table, winners) {
+    if (ncol(count_table) > 2) {
+        count_table[,2:ncol(count_table)] <- apply(count_table[,2:ncol(count_table)],2,
+                                                   function(c) ifelse(is.na(c), ifelse(count_table$Candidate %in% winners, 'E', ' '), c))
+    }
+    count_table <- cbind(count_table, data.frame(Elected=count_table$Candidate %in% winners))
+    if (ncol(count_table) > 3) count_table <- count_table[ do.call(order, count_table[,2:(ncol(count_table)-1)]), ]
+    count_table <- count_table[rev(row.names(count_table)),]
+    row.names(count_table) <- NULL
+    return(count_table)
+}
 
 #' @export
 print.STV <- function(stv) {

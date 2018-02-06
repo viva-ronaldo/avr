@@ -4,13 +4,17 @@
 \alias{stv}
 \title{Single transferable vote}
 \usage{
-stv(votes, nseats)
+stv(votes, nseats, verbose = FALSE, getMatrix = FALSE, report = FALSE,
+  report_path = ifelse(report, "stv_single_report.html", NULL),
+  getTable = ifelse(report, TRUE, FALSE))
 }
 \arguments{
 \item{votes}{A list of order-of-preference vote vectors, or a list of ballot
 objects.}
 
 \item{nseats}{How many seats to fill.}
+
+\item{verbose}{Print out intermediate information or not}
 }
 \value{
 An STV object, containing:
@@ -41,4 +45,3 @@ votes <- list(
 )
 stv(votes, 2)
 }
-

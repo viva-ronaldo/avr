@@ -9,4 +9,3 @@ get_nvotes(fps, candidate, weights)
 \description{
 Get the number of votes for a given candidate
 }
-

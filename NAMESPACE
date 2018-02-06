@@ -2,6 +2,9 @@
 
 S3method(print,IRV)
 S3method(print,STV)
+S3method(print,ens_STV)
 export(ballot)
+export(ensemble_stv)
 export(irv)
+export(read_votes_from_csv)
 export(stv)

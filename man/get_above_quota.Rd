@@ -9,4 +9,3 @@ get_above_quota(fps, quota, weights)
 \description{
 Return the names of the candidates who are over the current quota
 }
-
