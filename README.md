@@ -31,12 +31,17 @@ votes <- list(
   ballot(2, 3, 4, 1, map = map)
 )
 
+# my_votes_table.csv:
+# a,1,1,1,2,2,3,3,3,2
+# b,2,2,2,1,1,2,2,4,3
+# c,3,3,4,3,3,1,1,2,4
+# d,4,4,3,4,4,4,4,1,1
 votes <- read_votes_from_csv('my_votes_table.csv')
 ```
 
 STV can be run as a single iteration, or, because elections with small numbers of votes often involve ties, in ensemble mode, with ties resolved randomly:
 
-```
+```r
 stv(votes, 2)  #random resolution of ties, e.g.
 # An avr stv object.
 # Winners:
@@ -52,6 +57,7 @@ ensemble_stv(votes, 2, nensemble=10)
 # 3         b          38
 ```
 
-Use `r report = TRUE` to output a nicely formatted report showing the round-by-round election results and the vote transfers that occurred.
+Use `report = TRUE` to output a nicely formatted report showing the round-by-round election results and the vote transfers that occurred.
 
+**TODO** look at full ballots for transfer grid in report
 **TODO** merge stv and ensemble_stv into one function
