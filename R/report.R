@@ -1,3 +1,13 @@
+transpose_votes <- function(votes, candidates) {
+    tra_votes <- data.frame(dum=seq(length(votes)))
+    for (cand in candidates) {
+        tra_votes[,cand] <- as.integer(sapply(votes, function(x) which(x==cand)))
+    }
+    tra_votes$dum <- NULL
+    tra_votes
+}
+
+
 get_report_text <- function(ensemble=TRUE, unanimous=NULL) {
 string_parts <- vector(mode='character', length=7)
 
@@ -79,6 +89,7 @@ print(pretty_print_count_table(stv_out$count_table))
 "
 }
 
+#TODO also print in unanimous ensemble
 if (!ensemble) {
     string_parts[7] <- "Actual transfers were:\n\n
 ```{r echo=FALSE, fig.height=6, fig.width=6}
@@ -93,15 +104,51 @@ circlize::circos.clear()
 "
 } else { string_parts[7] <- "" }
 
-string_parts[8] <- "\n\nTransfer fractions considering full ballots were:\n\n
+#Need to turn votes lists into tra_votes which is ballots as rows, cands as columns
+string_parts[8] <- "\n\nTransfer fractions, considering full ballots 
+and weighting towards higher-preference transfers, were:\n\n
 ```{r echo=FALSE}
-stv_out$transfer_matrix$Donor <- row.names(stv_out$transfer_matrix)
-tra_grid_plot <- reshape2::melt(stv_out$transfer_matrix,id.vars='Donor',
-variable.name='Recipient',value.name='Fraction')
-tra_grid_plot$Donor <- factor(tra_grid_plot$Donor, 
-levels=levels(tra_grid_plot$Recipient))
-print(ggplot2::ggplot(tra_grid_plot,ggplot2::aes(Recipient,Donor)) + ggplot2::geom_tile(ggplot2::aes(fill=Fraction)) +
-ggplot2::scale_fill_distiller(palette='Spectral',direction=-1) + ggplot2::theme_bw())
+tra_votes <- transpose_votes(stv_out$votes, stv_out$candidates)
+
+#Weight 1-2 transfer twice as much as 2-3, etc. Ignore second last to last.
+transfers_full <- data.frame()
+for (b in seq(stv_out$nballots)) {
+  for (i in seq(length(stv_out$candidates)-2)) {
+    downweight_factor <- 1 / 2**(i-1)
+    from <- names(tra_votes)[which(tra_votes[b,]==i)]
+    if (length(from) == 0) break
+
+    left <- names(tra_votes)[which(tra_votes[b,]>i)]
+
+    for (potential in left) {
+        if (is.na(tra_votes[b,potential])) {
+            transfer_score <- 0
+        } else {
+            transfer_score <- 1 / 2**(tra_votes[b,potential]-i-1)
+        }
+        val <- transfer_score * downweight_factor
+        transfers_full <- rbind(transfers_full,
+            data.frame(Candidate=from, Target=potential, val=val, possible=downweight_factor))
+    }
+  }
+}
+
+transfers_full <- dplyr::summarise(dplyr::group_by(transfers_full, Candidate, Target),
+fraction_transferred=sum(val)/sum(possible))
+
+#normalise: as method is rough, we get outgoing fractions not summing to 1
+out_fractions <- dplyr::summarise(dplyr::group_by(transfers_full, Candidate), tot_from=sum(fraction_transferred))
+transfers_full <- merge(transfers_full, out_fractions, by=\'Candidate\')
+transfers_full$fraction_transferred <- transfers_full$fraction_transferred / transfers_full$tot_from
+
+transfers_full$Candidate <- factor(transfers_full$Candidate,
+                                   levels=rev(sort(levels(transfers_full$Candidate))))
+transfers_full$Target <- factor(transfers_full$Target,
+                                levels=rev(sort(levels(transfers_full$Target))))
+ggplot2::ggplot(transfers_full, ggplot2::aes(Target,Candidate)) +
+  ggplot2::geom_tile(ggplot2::aes(fill=fraction_transferred)) +
+  ggplot2::scale_fill_distiller(palette='Spectral',direction=-1) + ggplot2::theme_classic()
+
 ```
 "
 

@@ -3,8 +3,7 @@ Title: Alternative voting systems in R.
 Version: 0.4
 Authors@R: as.person(c(
   "Dex Groves <dex.groves@gmail.com> [aut, cre]", 
-  "David Mulholland <davidmulholland17@gmail.com> [aut]"
-))
+  "David Mulholland <davidmulholland17@gmail.com> [aut]"))
 Description: Implementations of instant runoff voting and single transferable vote.
 Depends:
     R (>= 3.0.0)

@@ -59,5 +59,4 @@ ensemble_stv(votes, 2, nensemble=10)
 
 Use `report = TRUE` to output a nicely formatted report showing the round-by-round election results and the vote transfers that occurred.
 
-**TODO** look at full ballots for transfer grid in report
 **TODO** merge stv and ensemble_stv into one function

@@ -153,6 +153,7 @@ stv <- function(votes, nseats, verbose=FALSE,
     
     stv_single_results <- structure(
         list(nballots = nballots,
+             candidates = running,
              nseats = nseats,
              quota = quota,
              winners = winners,

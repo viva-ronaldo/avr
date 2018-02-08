@@ -51,7 +51,7 @@ ensemble_stv <- function(votes, nseats, nensemble,
     if (length(possible_count_tables) == 1) pathway_string <- '%i possible pathway' 
         else pathway_string <- '%i possible pathways'
     message(sprintf(pathway_string, length(possible_count_tables)))
-    transfer_matrix <- results$transfer_matrix
+    #transfer_matrix <- results$transfer_matrix  #this is just the last one, not very useful
     
     winner_freqs <- data.frame()
     for (winner in names(elected_counts[elected_counts > 0])) {
@@ -62,13 +62,15 @@ ensemble_stv <- function(votes, nseats, nensemble,
     row.names(ensemble_result) <- seq(nrow(ensemble_result))
     
     stv_ens_results <- structure(
-        list(nseats=nseats,
-             nensemble=nensemble,
-             nballots=length(votes),
-             quota=droop_quota(length(votes),nseats),
-             ensemble_result=ensemble_result,
-             pathways=possible_count_tables,
-             transfer_matrix=transfer_matrix),
+        list(nseats = nseats,
+             nensemble = nensemble,
+             nballots = length(votes),
+             candidates = running,
+             quota = droop_quota(length(votes),nseats),
+             ensemble_result = ensemble_result,
+             pathways = possible_count_tables,
+             votes = votes),
+             #transfer_matrix=transfer_matrix),
         class = 'ens_STV'
     )
     
@@ -88,11 +90,24 @@ ensemble_stv <- function(votes, nseats, nensemble,
     return(stv_ens_results)
 }
 
+# stv_out$transfer_matrix$Donor <- row.names(stv_out$transfer_matrix)
+# tra_grid_plot <- reshape2::melt(stv_out$transfer_matrix,id.vars='Donor',
+#                                 variable.name='Recipient',value.name='Fraction')
+# tra_grid_plot$Donor <- factor(tra_grid_plot$Donor,
+#                               levels=levels(tra_grid_plot$Recipient))
+# print(ggplot2::ggplot(tra_grid_plot,ggplot2::aes(Recipient,Donor)) + ggplot2::geom_tile(ggplot2::aes(fill=Fraction)) +
+#           ggplot2::scale_fill_distiller(palette='Spectral',direction=-1) + ggplot2::theme_bw())
+
+# transfers_full$Candidate <- factor(transfers_full$Candidate,
+#                                    levels=rev(c('Avoca','Board','Bowling','Dinner','Escape','Laser')))
+# transfers_full$Target <- factor(transfers_full$Target,
+#                                 levels=c('Avoca','Board','Bowling','Dinner','Escape','Laser'))
+
 #' @export
 print.ens_STV <- function(ens_stv) {
     #message("An avr ens_stv object.")
-    print(ens_stv$ensemble_result)
     message("Winners:")
+    print(ens_stv$ensemble_result)
     invisible()
 }
 
