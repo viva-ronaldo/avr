@@ -2,11 +2,12 @@
 % Please edit documentation in R/stv.R
 \name{get_stv_loser}
 \alias{get_stv_loser}
-\title{Return the lowest-voted candidate by FPs, resolving ties randomly}
+\title{Return the lowest-voted candidate by FPs, resolving ties randomly
+Updated so as not to miss candidates on 0 FPs}
 \usage{
-get_stv_loser(fps, weights)
+get_stv_loser(fps, stillIn, weights)
 }
 \description{
 Return the lowest-voted candidate by FPs, resolving ties randomly
+Updated so as not to miss candidates on 0 FPs
 }
-
