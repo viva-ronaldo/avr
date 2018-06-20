@@ -4,9 +4,9 @@
 \alias{stv}
 \title{Single transferable vote}
 \usage{
-stv(votes, nseats, verbose = FALSE, getMatrix = FALSE, report = FALSE,
-  report_path = ifelse(report, "stv_single_report.html", NULL),
-  getTable = ifelse(report, TRUE, FALSE))
+stv(votes, nseats, verbose = FALSE, use_fps_for_final_tie = TRUE,
+  getMatrix = FALSE, report = FALSE, report_path = ifelse(report,
+  "stv_single_report.html", NULL), getTable = ifelse(report, TRUE, FALSE))
 }
 \arguments{
 \item{votes}{A list of order-of-preference vote vectors, or a list of ballot

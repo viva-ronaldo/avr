@@ -1,13 +1,22 @@
 #' Read in a csv file of candidates and ballots in standard format, 
-#' with candidates as rows and ballots as columns, and no header
+#' with candidates as rows and ballots as columns, and no header,
+#' or with candidates as columns and ballots as rows
 #' @param file_name The csv file containing votes
 #' @return List of ballots, named ballot1, ballot2, etc.
 #' @export
-read_votes_from_csv <- function(file_name) {
-    votes <- read.csv(file_name, header=FALSE, stringsAsFactors=FALSE)
+read_votes_from_csv <- function(file_name, ballots_as_rows=FALSE) {
+    if (ballots_as_rows | 
+        sum(sapply(read.csv(file_name, nrows=1, header=FALSE), is.integer)) > 0) {
+        votes <- read.csv(file_name, header=FALSE, stringsAsFactors=FALSE)
+    } else {
+        votes <- read.csv(file_name, header=TRUE)
+        votes <- t(votes)
+        votes <- data.frame(Candidates=row.names(votes), votes, stringsAsFactors = FALSE)
+    }
+    names(votes) <- c('Candidates', paste0('ballot',seq(ncol(votes)-1)))
     message(sprintf('%g candidates on ballot',nrow(votes)))
     message(sprintf('%g votes received',ncol(votes)-1))
-    names(votes) <- c('Candidates', paste0('ballot',seq(ncol(votes)-1)))
+    
     return(lapply(votes[2:ncol(votes)], function(b) ballot(b, map=votes$Candidates)))
 }
 
@@ -28,8 +37,9 @@ read_votes_from_csv <- function(file_name) {
 #' }
 #' @export
 ensemble_stv <- function(votes, nseats, nensemble,
-                            report=FALSE, 
-                            report_path=ifelse(report,'stv_ens_report.html',NULL)) {
+                         report=FALSE, 
+                         report_path=ifelse(report,'stv_ens_report.html',NULL),
+                         use_fps_for_final_tie=TRUE) {
     if (report) {
         #Need ggplot2, reshape2, kableExtra, formattable to make report
         if (length(intersect(c('ggplot2','reshape2','kableExtra','formattable'),
@@ -42,7 +52,8 @@ ensemble_stv <- function(votes, nseats, nensemble,
     possible_count_tables <- c() 
     
     for (e in seq(nensemble)) {
-        results <- stv(votes, nseats, getTable=TRUE, getMatrix=TRUE)  #TODO change to stv
+        results <- stv(votes, nseats, getTable=TRUE, getMatrix=TRUE,
+                       use_fps_for_final_tie=use_fps_for_final_tie)
         for (candidate in results$winners) {
             elected_counts[[candidate]] <- elected_counts[[candidate]] + 1
         }

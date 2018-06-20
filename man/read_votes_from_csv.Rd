@@ -3,9 +3,10 @@
 \name{read_votes_from_csv}
 \alias{read_votes_from_csv}
 \title{Read in a csv file of candidates and ballots in standard format, 
-with candidates as rows and ballots as columns, and no header}
+with candidates as rows and ballots as columns, and no header,
+or with candidates as columns and ballots as rows}
 \usage{
-read_votes_from_csv(file_name)
+read_votes_from_csv(file_name, ballots_as_rows = FALSE)
 }
 \arguments{
 \item{file_name}{The csv file containing votes}
@@ -15,5 +16,6 @@ List of ballots, named ballot1, ballot2, etc.
 }
 \description{
 Read in a csv file of candidates and ballots in standard format, 
-with candidates as rows and ballots as columns, and no header
+with candidates as rows and ballots as columns, and no header,
+or with candidates as columns and ballots as rows
 }

@@ -6,7 +6,8 @@
 to handle ties being broken randomly.}
 \usage{
 ensemble_stv(votes, nseats, nensemble, report = FALSE,
-  report_path = ifelse(report, "stv_ens_report.html", NULL))
+  report_path = ifelse(report, "stv_ens_report.html", NULL),
+  use_fps_for_final_tie = TRUE)
 }
 \arguments{
 \item{votes}{List of ballot objects, such as returned by read_votes_from_csv}

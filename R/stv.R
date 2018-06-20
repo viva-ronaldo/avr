@@ -29,7 +29,7 @@
 #'   ballot(0, 3, 1, 2, 0, map = map)
 #' )
 #' stv(votes, 2)
-stv <- function(votes, nseats, verbose=FALSE, 
+stv <- function(votes, nseats, verbose=FALSE, use_fps_for_final_tie=TRUE,
                 getMatrix=FALSE, 
                 report=FALSE, report_path=ifelse(report,'stv_single_report.html',NULL),
                 getTable=ifelse(report,TRUE,FALSE)) {
@@ -52,6 +52,13 @@ stv <- function(votes, nseats, verbose=FALSE,
     if (getMatrix) transfer_matrix <- data.frame() else transfer_matrix <- NULL
     if (getTable) count_table <- data.frame(Candidate=running) else count_table <- NULL
     can_drop_bottom <- 1
+    #get order by pref1s, pref2s, etc in case need to break a tie later
+    pref_counts_df <- data.frame(cand = running, stringsAsFactors = FALSE)
+    for (i in 1:length(running)) {
+        pref_counts_df[,paste0('pref',i)] <- sapply(running, function(p) 
+            sum(sapply(votes, function(l) l[i]) == p, na.rm=TRUE))
+    }
+    order_for_ties <- pref_counts_df[do.call(order, -pref_counts_df[,2:(ncol(pref_counts_df)-1)]), 'cand']
     
     if (getTable | verbose) rnd_num <- 1
     while (length(winners) < nseats) {
@@ -116,7 +123,8 @@ stv <- function(votes, nseats, verbose=FALSE,
                 can_drop_bottom <- get_number_to_eliminate(rev(get_current_table(stillIn, fps, weights)$votes), quota)
                 #if (can_drop_bottom > 1) { message(sprintf('Can drop bottom %i',can_drop_bottom)) }
             }
-            loser <- get_stv_loser(fps, stillIn, weights)
+            loser <- get_stv_loser(fps, stillIn, weights, order_for_ties, nseats-length(winners),
+                                   use_fps_for_final_tie=use_fps_for_final_tie)
             votesForTransfer <- get_nvotes(fps, loser, weights)
             if (verbose) message(sprintf('-> %s eliminated with %g\n',loser,votesForTransfer))
             cand_out <- loser
@@ -190,11 +198,19 @@ get_nvotes <- function(fps, candidate, weights) {
 
 #' Return the lowest-voted candidate by FPs, resolving ties randomly
 #' Updated so as not to miss candidates on 0 FPs
-get_stv_loser <- function(fps,stillIn,weights) {
+get_stv_loser <- function(fps, stillIn, weights, order_for_ties, 
+                          nseats_left, use_fps_for_final_tie=FALSE) {
   sum_wts <- sapply(stillIn, function(fp) sum(weights[fps == fp]))
   #losers <- ufps[sum_wts == min(sum_wts)] #seem to get precision error when transfers were previously involved
   losers <- stillIn[abs(sum_wts - min(sum_wts)) < 1e-9] 
-  return(sample(losers, 1))
+  #if have (nseats_remaining + 1) candidates tied, can use fps instead to split
+  if (use_fps_for_final_tie & length(losers) == (nseats_left+1) & 
+      length(stillIn) == (nseats_left+1)) {
+      #print('Breaking tie by FPs')
+      return(losers[which.max(sapply(losers, function(x) which(order_for_ties == x)))])
+  } else {
+      return(sample(losers, 1))    
+  }
 }
 
 #' For verbose output, print the current votes leaderboard

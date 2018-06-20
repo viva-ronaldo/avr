@@ -34,7 +34,7 @@ if (ensemble) {
     string_parts[2] <- "run."
 }
 
-string_parts[3] <- "There were `r stv_out$nballots` votes cast; the quota was `r stv_out$quota`.
+string_parts[3] <- " There were `r stv_out$nballots` votes cast; the quota was `r stv_out$quota`.
 
 There were `r nrow(stv_out$count_table)` candidates, with first preferences as follows:
 ```{r echo=FALSE}
