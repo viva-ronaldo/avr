@@ -52,13 +52,14 @@ stv <- function(votes, nseats, verbose=FALSE, use_fps_for_final_tie=TRUE,
     if (getMatrix) transfer_matrix <- data.frame() else transfer_matrix <- NULL
     if (getTable) count_table <- data.frame(Candidate=running) else count_table <- NULL
     can_drop_bottom <- 1
-    #get order by pref1s, pref2s, etc in case need to break a tie later
+    #get order by pref1s, pref2s, etc in case need to break a tie later, including random tie breaker
     pref_counts_df <- data.frame(cand = running, stringsAsFactors = FALSE)
     for (i in 1:length(running)) {
         pref_counts_df[,paste0('pref',i)] <- sapply(running, function(p) 
             sum(sapply(votes, function(l) l[i]) == p, na.rm=TRUE))
     }
-    order_for_ties <- pref_counts_df[do.call(order, -pref_counts_df[,2:(ncol(pref_counts_df)-1)]), 'cand']
+    pref_counts_df$random_split <- sample.int(nrow(pref_counts_df))
+    order_for_ties <- pref_counts_df[do.call(order, -pref_counts_df[,2:(ncol(pref_counts_df))]), 'cand']
     
     if (getTable | verbose) rnd_num <- 1
     while (length(winners) < nseats) {
@@ -206,7 +207,7 @@ get_stv_loser <- function(fps, stillIn, weights, order_for_ties,
   #if have (nseats_remaining + 1) candidates tied, can use fps instead to split
   if (use_fps_for_final_tie & length(losers) == (nseats_left+1) & 
       length(stillIn) == (nseats_left+1)) {
-      #print('Breaking tie by FPs')
+      #message('Breaking tie by FPs')
       return(losers[which.max(sapply(losers, function(x) which(order_for_ties == x)))])
   } else {
       return(sample(losers, 1))    
