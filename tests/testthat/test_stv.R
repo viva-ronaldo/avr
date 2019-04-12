@@ -1,11 +1,5 @@
 context("Single Transferable Vote")
 
-
-replist <- function(arg, times) {
-  lapply(seq(times), function(i) arg)
-}
-
-
 votes <- list(
   dex = c("Ice Skating", "Unihoc", "Food"),
   dean = c("Ice Skating", "Unihoc", "Food"),

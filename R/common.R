@@ -61,3 +61,7 @@ get_lowest_voted <- function(fps) {
   tab <- table(fps)
   names(tab)[tab == min(tab)]
 }
+
+replist <- function(arg, times) {
+    lapply(seq(times), function(i) arg)
+}

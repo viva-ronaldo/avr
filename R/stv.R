@@ -43,6 +43,7 @@ stv <- function(votes, nseats, verbose=FALSE, use_fps_for_final_tie=TRUE,
     
     winners <- c()
     out <- c()
+    used_random <- FALSE
     nballots <- length(votes)
     nvotes <- nballots
     weights <- rep(1, nvotes)
@@ -50,7 +51,7 @@ stv <- function(votes, nseats, verbose=FALSE, use_fps_for_final_tie=TRUE,
     if (verbose) message('Quota is ',quota)
     running <- get_all_entries(votes)
     if (getMatrix) transfer_matrix <- data.frame() else transfer_matrix <- NULL
-    if (getTable) count_table <- data.frame(Candidate=running) else count_table <- NULL
+    if (getTable) count_table <- data.frame(candidate=running) else count_table <- NULL
     can_drop_bottom <- 1
     #get order by pref1s, pref2s, etc in case need to break a tie later, including random tie breaker
     pref_counts_df <- data.frame(cand = running, stringsAsFactors = FALSE)
@@ -70,8 +71,8 @@ stv <- function(votes, nseats, verbose=FALSE, use_fps_for_final_tie=TRUE,
         if (verbose) print(get_current_table(stillIn, fps, weights))
         if (getTable & can_drop_bottom == 1) {
             count_table <- merge(count_table, get_current_table(stillIn, fps, weights), 
-                                 by='Candidate', all.x=T)
-            names(count_table)[ncol(count_table)] <- paste0('Round_',rnd_num)
+                                 by='candidate', all.x=T)
+            names(count_table)[ncol(count_table)] <- paste0('round_',rnd_num)
             rnd_num <- rnd_num + 1
         } else if (verbose) {
             rnd_num <- rnd_num + 1  
@@ -124,8 +125,11 @@ stv <- function(votes, nseats, verbose=FALSE, use_fps_for_final_tie=TRUE,
                 can_drop_bottom <- get_number_to_eliminate(rev(get_current_table(stillIn, fps, weights)$votes), quota)
                 #if (can_drop_bottom > 1) { message(sprintf('Can drop bottom %i',can_drop_bottom)) }
             }
-            loser <- get_stv_loser(fps, stillIn, weights, order_for_ties, nseats-length(winners),
-                                   use_fps_for_final_tie=use_fps_for_final_tie)
+            loser_info <- get_stv_loser(fps, stillIn, weights, order_for_ties, nseats-length(winners),
+                                        use_fps_for_final_tie=use_fps_for_final_tie)
+            loser <- loser_info$loser
+            if (loser_info$used_random) used_random <- TRUE
+            
             votesForTransfer <- get_nvotes(fps, loser, weights)
             if (verbose) message(sprintf('-> %s eliminated with %g\n',loser,votesForTransfer))
             cand_out <- loser
@@ -161,23 +165,43 @@ stv <- function(votes, nseats, verbose=FALSE, use_fps_for_final_tie=TRUE,
     }
     
     stv_single_results <- structure(
-        list(nballots = nballots,
+        list(ballots = ballots,
+             nballots = nballots,
              candidates = running,
              nseats = nseats,
              quota = quota,
              winners = winners,
+             used_random = used_random,
              transfer_matrix = transfer_matrix,
              count_table = count_table),
         class = "STV"
     )
     
     if (report) {
+        summ_res <- run_all_methods(ballots, nseats=nseats)$summary_table
+        #overwrite the STV column to make sure it matches this result in the event of used_random
+        summ_res$elected_stv <- summ_res$candidate %in% winners
+        
+        #stv_single_results$points_table_formatted <- get_points_table_formatted(count_table, winners)
+        stv_single_results$points_table_formatted <- get_points_table_formatted(
+            stv_single_results$count_table, 
+            winners,
+            'round_1', 'palegreen')
+
         saveRDS(stv_single_results, file='tmp_stv_single_results.rds')
-        report_text <- get_report_text(ensemble=FALSE)
-        cat(sprintf(report_text, 'tmp_stv_single_results.rds'), file='tmp_stv_single_report.rmd')
+        stv_single_results$points_table_formatted <- NULL
+        #report_text <- get_report_text(ensemble=FALSE)
+        #cat(sprintf(report_text, 'tmp_stv_single_results.rds'), file='tmp_stv_single_report.rmd')
+        report_text <- get_generic_report_text(method='stv', ensemble=FALSE)
+        cat(sprintf(report_text,
+                    'tmp_stv_single_results.rds',
+                    'Single Transferable Vote',
+                    sprintf('* The quota was **%i**\n', stv_single_results$quota),
+                    compare_result_by_method('STV', summ_res)),
+            file='tmp_stv_single_report.rmd')
         capture.output(suppressMessages(rmarkdown::render('tmp_stv_single_report.rmd', 
                                                           output_file=report_path, quiet=TRUE)))
-        system('rm tmp_stv_single_results.rds tmp_stv_single_report.rmd')
+        #system('rm tmp_stv_single_results.rds tmp_stv_single_report.rmd')
         message(sprintf('Report written to %s',report_path))
     }
     
@@ -208,9 +232,11 @@ get_stv_loser <- function(fps, stillIn, weights, order_for_ties,
   if (use_fps_for_final_tie & length(losers) == (nseats_left+1) & 
       length(stillIn) == (nseats_left+1)) {
       #message('Breaking tie by FPs')
-      return(losers[which.max(sapply(losers, function(x) which(order_for_ties == x)))])
+      return(list(loser=losers[which.max(sapply(losers, function(x) which(order_for_ties == x)))],
+                  used_random=FALSE))
   } else {
-      return(sample(losers, 1))    
+      return(list(loser=sample(losers, 1),
+                  used_random=TRUE))   
   }
 }
 
@@ -218,7 +244,7 @@ get_stv_loser <- function(fps, stillIn, weights, order_for_ties,
 get_current_table <- function(stillIn, fps, weights) {
     fpframe <- data.frame()
     for (p in stillIn) {
-        fpframe <- rbind(fpframe, data.frame(Candidate=p, 
+        fpframe <- rbind(fpframe, data.frame(candidate=p, 
                                              votes=round(get_nvotes(fps,p,weights),2)))
     }
     fpframe[order(fpframe$votes, decreasing=TRUE), ]
@@ -273,9 +299,9 @@ get_number_to_eliminate <- function(ordered_current_votes, quota) {
 finalise_count_table <- function(count_table, winners) {
     if (ncol(count_table) > 2) {
         count_table[,2:ncol(count_table)] <- apply(count_table[,2:ncol(count_table)],2,
-                                                   function(c) ifelse(is.na(c), ifelse(count_table$Candidate %in% winners, 'E', ' '), c))
+                                                   function(c) ifelse(is.na(c), ifelse(count_table$candidate %in% winners, 'E', ' '), c))
     }
-    count_table <- cbind(count_table, data.frame(Elected=count_table$Candidate %in% winners))
+    count_table <- cbind(count_table, data.frame(elected=count_table$candidate %in% winners))
     if (ncol(count_table) > 3) count_table <- count_table[ do.call(order, count_table[,2:(ncol(count_table)-1)]), ]
     count_table <- count_table[rev(row.names(count_table)),]
     row.names(count_table) <- NULL

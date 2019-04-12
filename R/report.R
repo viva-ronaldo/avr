@@ -26,7 +26,7 @@ if (nrow(stv_out$count_table) <= 8) row.cols <- row.cols[1:nrow(stv_out$count_ta
 if (is.element(\'pathways\', names(stv_out))) npathways <- length(stv_out$pathways)
 ```
 
-An STV election with `r stv_out$nseats` `r if (stv_out$nseats > 1) {\"seats\"} else {\"seat\"}` was "
+## Results\n\nAn STV election with `r stv_out$nseats` `r if (stv_out$nseats > 1) {\"seats\"} else {\"seat\"}` was "
 
 if (ensemble) {
     string_parts[2] <- "run in ensemble mode, with `r stv_out$nensemble` iterations."
@@ -105,10 +105,10 @@ circlize::circos.clear()
 } else { string_parts[7] <- "" }
 
 #Need to turn votes lists into tra_votes which is ballots as rows, cands as columns
-string_parts[8] <- "\n\nTransfer fractions, considering full ballots 
+string_parts[8] <- "\n\nTransfer fractions, looking at full ballots 
 and weighting towards higher-preference transfers, were:\n\n
 ```{r echo=FALSE}
-tra_votes <- transpose_votes(stv_out$votes, stv_out$candidates)
+tra_votes <- transpose_votes(stv_out$ballots, stv_out$candidates)
 
 #Weight 1-2 transfer twice as much as 2-3, etc. Ignore second last to last.
 transfers_full <- data.frame()
