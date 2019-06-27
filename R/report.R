@@ -63,8 +63,8 @@ style = x ~ formattable::style(color = ifelse(x,\"green\",\"red\"),width=\"50px\
 x ~ formattable::icontext(ifelse(x,\"ok\",\"remove\")))
 pretty_print_count_table <- function(count_table) {
 kableExtra::kable_styling(knitr::kable(dplyr::mutate(count_table, 
-Round_1=formattable::normalize_bar(\"pink\")(Round_1),
-Elected=elected_formatter(Elected)), \"html\", escape=F, align=\"r\"),
+round_1=formattable::normalize_bar(\"pink\")(round_1),
+elected=elected_formatter(elected)), \"html\", escape=F, align=\"r\"),
 bootstrap_options=c(\"hover\"), full_width=F)
 }
 ```
@@ -108,7 +108,7 @@ circlize::circos.clear()
 string_parts[8] <- "\n\nTransfer fractions, looking at full ballots 
 and weighting towards higher-preference transfers, were:\n\n
 ```{r echo=FALSE}
-tra_votes <- transpose_votes(stv_out$ballots, stv_out$candidates)
+tra_votes <- transpose_votes(stv_out$votes, stv_out$candidates)
 
 #Weight 1-2 transfer twice as much as 2-3, etc. Ignore second last to last.
 transfers_full <- data.frame()
@@ -128,24 +128,24 @@ for (b in seq(stv_out$nballots)) {
         }
         val <- transfer_score * downweight_factor
         transfers_full <- rbind(transfers_full,
-            data.frame(Candidate=from, Target=potential, val=val, possible=downweight_factor))
+            data.frame(candidate=from, Target=potential, val=val, possible=downweight_factor))
     }
   }
 }
 
-transfers_full <- dplyr::summarise(dplyr::group_by(transfers_full, Candidate, Target),
+transfers_full <- dplyr::summarise(dplyr::group_by(transfers_full, candidate, Target),
 fraction_transferred=sum(val)/sum(possible))
 
 #normalise: as method is rough, we get outgoing fractions not summing to 1
-out_fractions <- dplyr::summarise(dplyr::group_by(transfers_full, Candidate), tot_from=sum(fraction_transferred))
-transfers_full <- merge(transfers_full, out_fractions, by=\'Candidate\')
+out_fractions <- dplyr::summarise(dplyr::group_by(transfers_full, candidate), tot_from=sum(fraction_transferred))
+transfers_full <- merge(transfers_full, out_fractions, by=\'candidate\')
 transfers_full$fraction_transferred <- transfers_full$fraction_transferred / transfers_full$tot_from
 
-transfers_full$Candidate <- factor(transfers_full$Candidate,
-                                   levels=rev(sort(levels(transfers_full$Candidate))))
+transfers_full$candidate <- factor(transfers_full$candidate,
+                                   levels=rev(sort(levels(transfers_full$candidate))))
 transfers_full$Target <- factor(transfers_full$Target,
                                 levels=rev(sort(levels(transfers_full$Target))))
-ggplot2::ggplot(transfers_full, ggplot2::aes(Target,Candidate)) +
+ggplot2::ggplot(transfers_full, ggplot2::aes(Target,candidate)) +
   ggplot2::geom_tile(ggplot2::aes(fill=fraction_transferred)) +
   ggplot2::scale_fill_distiller(palette='Spectral',direction=-1) + ggplot2::theme_classic()
 
