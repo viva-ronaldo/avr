@@ -108,6 +108,8 @@ condorcet <- function(ballots,
     
     if (report) {
         summ_res <- run_all_methods(ballots, nseats=1)
+        #overwrite the condorcet column to make sure it matches this result in the event of used_random
+        summ_res$elected_condorcet <- summ_res$candidate %in% winners
         
         win_method_text <- list(
             'outright'='There was an outright winner (wins all head-to-heads)',
@@ -127,8 +129,7 @@ condorcet <- function(ballots,
             list(formattable::area(col = condorcet_results$candidates) ~ formattable::color_tile('palevioletred1','palegreen')), 
             align='c')
         saveRDS(condorcet_results, file='tmp_condorcet_single_results.rds')
-        condorcet_results$pairs_grid_formatted <- NULL
-        condorcet_results$points_table_formatted <- NULL
+        condorcet_results[, c('pairs_grid_formatted', 'points_table_formatted')] <- NULL
         
         report_text <- get_generic_report_text(method='condorcet', ensemble=FALSE)
         cat(sprintf(report_text, 

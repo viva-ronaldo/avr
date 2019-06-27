@@ -179,7 +179,7 @@ stv <- function(votes, nseats, verbose=FALSE, use_fps_for_final_tie=TRUE,
     
     if (report) {
         summ_res <- run_all_methods(ballots, nseats=nseats)$summary_table
-        #overwrite the STV column to make sure it matches this result in the event of used_random
+        #overwrite the stv column to make sure it matches this result in the event of used_random
         summ_res$elected_stv <- summ_res$candidate %in% winners
         
         #stv_single_results$points_table_formatted <- get_points_table_formatted(count_table, winners)

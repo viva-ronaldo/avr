@@ -72,6 +72,8 @@ borda <- function(ballots, nseats=1, variant = 'standard',
     
     if (report) {
         summ_res <- run_all_methods(ballots, nseats=nseats)
+        #overwrite the borda column to make sure it matches this result in the event of used_random
+        summ_res$elected_borda <- summ_res$candidate %in% borda_results$winners
         
         borda_results$points_table_formatted <- get_points_table_formatted(
             borda_results$points_table, 
