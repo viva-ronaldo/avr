@@ -29,6 +29,11 @@ read_votes_from_csv <- function(file_name, ballots_as_rows=FALSE) {
 #'   showing the possible count pathways and overall result (default: FALSE)
 #' @param report_path If report is TRUE, the file name of the report
 #'   (default: stv_ens_report.html)
+#' @param use_fps_for_final_tie In STV, when on the last tie, split using FPs;
+#'   (default: TRUE)
+#' @param transfer_surplus In STV, do transfer votes from winners as well as losers.
+#'   In certain circumstances it may be preferable to only transfer from losers
+#'   (default: TRUE)
 #' @return An STV_ens object, containing:
 #'   \describe{
 #'     \item{ensemble_result:}{a table of all candidates elected at least once
@@ -39,7 +44,8 @@ read_votes_from_csv <- function(file_name, ballots_as_rows=FALSE) {
 ensemble_stv <- function(votes, nseats, nensemble,
                          report=FALSE, 
                          report_path=ifelse(report,'stv_ens_report.html',NULL),
-                         use_fps_for_final_tie=TRUE) {
+                         use_fps_for_final_tie=TRUE,
+                         transfer_surplus=TRUE) {
     if (report) {
         #Need ggplot2, reshape2, kableExtra, formattable to make report
         if (length(intersect(c('ggplot2','reshape2','kableExtra','formattable'),
@@ -53,7 +59,8 @@ ensemble_stv <- function(votes, nseats, nensemble,
     
     for (e in seq(nensemble)) {
         results <- stv(votes, nseats, getTable=TRUE, getMatrix=TRUE,
-                       use_fps_for_final_tie=use_fps_for_final_tie)
+                       use_fps_for_final_tie = use_fps_for_final_tie,
+                       transfer_surplus = transfer_surplus)
         for (candidate in results$winners) {
             elected_counts[[candidate]] <- elected_counts[[candidate]] + 1
         }

@@ -29,7 +29,8 @@
 #'   ballot(0, 3, 1, 2, 0, map = map)
 #' )
 #' stv(votes, 2)
-stv <- function(votes, nseats, verbose=FALSE, use_fps_for_final_tie=TRUE,
+stv <- function(votes, nseats, use_fps_for_final_tie=TRUE, transfer_surplus=TRUE,
+                verbose=FALSE, 
                 getMatrix=FALSE, 
                 report=FALSE, report_path=ifelse(report,'stv_single_report.html',NULL),
                 getTable=ifelse(report,TRUE,FALSE)) {
@@ -109,6 +110,7 @@ stv <- function(votes, nseats, verbose=FALSE, use_fps_for_final_tie=TRUE,
             for (winner in through_this_rnd) {
                 nvotes <- get_nvotes(fps, winner, weights)
                 excess <- round(nvotes - quota, 3) #avoid precision errors
+                if (!transfer_surplus) excess <- 0  #only transfer from losers in this case
                 transfer_ratio <- excess / nvotes
                 weights[fps == winner] <- weights[fps == winner] * transfer_ratio
                 
