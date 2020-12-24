@@ -1,7 +1,7 @@
 # avr
 Alternative voting systems in R.
 
-Currently supports [instant runoff voting](https://en.wikipedia.org/wiki/Instant-runoff_voting), and [single transferable vote](https://en.wikipedia.org/wiki/Single_transferable_vote) (STV), [Borda](https://en.wikipedia.org/wiki/Borda_count), and [Schulze/Condorcet](https://en.wikipedia.org/wiki/Condorcet_method) methods.
+Currently supports [instant runoff voting](https://en.wikipedia.org/wiki/Instant-runoff_voting), [single transferable vote](https://en.wikipedia.org/wiki/Single_transferable_vote) (STV), [Borda](https://en.wikipedia.org/wiki/Borda_count), and [Schulze/Condorcet](https://en.wikipedia.org/wiki/Condorcet_method) methods.
 
 ### Input 
 
@@ -93,11 +93,11 @@ stv(votes, 2, report = TRUE, report_path = './abcd_vote_report.html')
 ```
 Sample:
 
-![](docs/report_screenshot_1.png){width=600px}
+<img src="docs/report_screenshot_1.png" width="600px">
 
 Sample:
 
-![](docs/report_screenshot_2.png){width=480px}
+<img src="docs/report_screenshot_2.png" width="400px">
 
 And for STV, an animation of the count can be generated from the count result table:
 
@@ -105,5 +105,5 @@ And for STV, an animation of the count can be generated from the count result ta
 count_result <- stv(votes, 2, getTable = TRUE)
 create_stv_count_gif(count_result, 'abcd_vote_count.gif')
 ```
-![](docs/abcd_vote_count.gif){width=480px}
+<img src="docs/abcd_vote_count.gif" width="480px">
 
