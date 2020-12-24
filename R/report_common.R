@@ -21,7 +21,7 @@ check_maximized_first_prefs <- function(ballots, winners) {
 compare_result_by_method <- function(primary_method, summary_table) {
     other_methods <- setdiff(c('STV','Borda','Condorcet'), primary_method)
     if (sum(summary_table$elected_always) == sum(summary_table$elected_stv)) {
-        comp_string <- sprintf('The result would have been the same under %s and %s\n',
+        comp_string <- sprintf('The result would have been the same under %s and %s.\n',
                                other_methods[1], other_methods[2])
     } else {
         comp_string <- 'Other methods would have given a different result:\n\n'

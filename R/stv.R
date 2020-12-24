@@ -3,13 +3,27 @@
 #' @param votes A list of order-of-preference vote vectors, or a list of ballot
 #' objects.
 #' @param nseats How many seats to fill.
-#' @param verbose Print out intermediate information or not
+#' @param verbose Print out intermediate information or not.
+#' @param use_fps_for_final_tie Use number of first preference votes to settle a tie on the last round of the count? If not, settles the tie randomly.
+#' @param transfer_surplus Logical indicating whether or not to transfer the surplus votes when a candidate is elected with votes in excess of the quota. This should be TRUE for standard STV, but in custom situations it may be more desirable to drop the excess votes.
+#' @param report Generate an HTML report of the vote.
+#' @param report_path When \code{report} is TRUE, the filepath to which to save the generated report.
+#' @param getTable Calculate and return the count table. Must be TRUE if \code{report} is TRUE.
+#' @param getMatrix Calculate and return the transfer matrix.
 #'
 #' @return An STV object, containing:
 #'   \describe{
-#'     \item{winners:}{the winning entries in order of preference}
-#'     \item{More to come!}{}
+#'     \item{votes:}{the list of ballots}
+#'     \item{nballots:}{the number of ballots cast}
+#'     \item{candidates:}{the list of candidates}
+#'     \item{nseats:}{the number of seats available}
+#'     \item{quota:}{the STV quota}
+#'     \item{winners:}{the candidates that are elected}
+#'     \item{used_random:}{logical indicating if it was necessary to randomly break ties}
+#'     \item{transfer_matrix:}{TODO}
+#'     \item{count_table:}{TODO}
 #'   }
+#'   
 #' @export
 #' @examples
 #' votes <- list(
@@ -29,17 +43,18 @@
 #'   ballot(0, 3, 1, 2, 0, map = map)
 #' )
 #' stv(votes, 2)
-stv <- function(votes, nseats, use_fps_for_final_tie=TRUE, transfer_surplus=TRUE,
-                verbose=FALSE, 
-                getMatrix=FALSE, 
-                report=FALSE, report_path=ifelse(report,'stv_single_report.html',NULL),
-                getTable=ifelse(report,TRUE,FALSE)) {
+stv <- function(votes, nseats, 
+                use_fps_for_final_tie = TRUE, transfer_surplus = TRUE,
+                verbose = FALSE, 
+                report = FALSE, report_path = ifelse(report,'stv_single_report.html',NULL),
+                getTable = ifelse(report,TRUE,FALSE), getMatrix = FALSE) {
     
     if (report) {
-        #Need ggplot2, reshape2, kableExtra, formattable, circlize to make report
-        if (length(intersect(c('ggplot2','reshape2','kableExtra','formattable','circlize'),
-                             row.names(installed.packages()))) < 5) report <- FALSE
-        if (report) getMatrix <- TRUE
+        #Need ggplot2, kableExtra, formattable to make report
+        if (!requireNamespace(c("ggplot2","kableExtra","formattable","circlize"), quietly = TRUE)) {
+            stop('You must install packages "ggplot2", "kableExtra", "circlize", and "formattable" in order to generate a report.')
+        }   
+        getMatrix = TRUE
     }
     
     winners <- c()
@@ -62,6 +77,7 @@ stv <- function(votes, nseats, use_fps_for_final_tie=TRUE, transfer_surplus=TRUE
     }
     pref_counts_df$random_split <- sample.int(nrow(pref_counts_df))
     order_for_ties <- pref_counts_df[do.call(order, -pref_counts_df[,2:(ncol(pref_counts_df))]), 'cand']
+    votes_copy <- votes
     
     if (getTable | verbose) rnd_num <- 1
     while (length(winners) < nseats) {
@@ -167,7 +183,7 @@ stv <- function(votes, nseats, use_fps_for_final_tie=TRUE, transfer_surplus=TRUE
     }
     
     stv_single_results <- structure(
-        list(ballots = ballots,
+        list(votes = votes_copy,
              nballots = nballots,
              candidates = running,
              nseats = nseats,
@@ -180,16 +196,21 @@ stv <- function(votes, nseats, use_fps_for_final_tie=TRUE, transfer_surplus=TRUE
     )
     
     if (report) {
-        summ_res <- run_all_methods(ballots, nseats=nseats)$summary_table
+        summ_res <- run_all_methods(votes_copy, nseats=nseats)$summary_table
         #overwrite the stv column to make sure it matches this result in the event of used_random
         summ_res$elected_stv <- summ_res$candidate %in% winners
         
         #stv_single_results$points_table_formatted <- get_points_table_formatted(count_table, winners)
         stv_single_results$points_table_formatted <- get_points_table_formatted(
             stv_single_results$count_table, 
-            winners,
+            stv_single_results$winners,
             'round_1', 'palegreen')
 
+        report_path <- path.expand(report_path)  #first convert tilde, if there is one
+        if (substr(report_path,1,2) == './') report_path <- substring(report_path,3)
+        report_path <- paste(getwd(), report_path, sep='/')
+        owd <- setwd(tempdir())
+        
         saveRDS(stv_single_results, file='tmp_stv_single_results.rds')
         stv_single_results$points_table_formatted <- NULL
         #report_text <- get_report_text(ensemble=FALSE)
@@ -203,7 +224,8 @@ stv <- function(votes, nseats, use_fps_for_final_tie=TRUE, transfer_surplus=TRUE
             file='tmp_stv_single_report.rmd')
         capture.output(suppressMessages(rmarkdown::render('tmp_stv_single_report.rmd', 
                                                           output_file=report_path, quiet=TRUE)))
-        #system('rm tmp_stv_single_results.rds tmp_stv_single_report.rmd')
+        system('rm tmp_stv_single_results.rds tmp_stv_single_report.rmd')
+        setwd(owd)
         message(sprintf('Report written to %s',report_path))
     }
     

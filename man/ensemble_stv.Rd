@@ -5,9 +5,15 @@
 \title{Run stv multiple times and return elected frequencies,
 to handle ties being broken randomly.}
 \usage{
-ensemble_stv(votes, nseats, nensemble, report = FALSE,
+ensemble_stv(
+  votes,
+  nseats,
+  nensemble,
+  report = FALSE,
   report_path = ifelse(report, "stv_ens_report.html", NULL),
-  use_fps_for_final_tie = TRUE)
+  use_fps_for_final_tie = TRUE,
+  transfer_surplus = TRUE
+)
 }
 \arguments{
 \item{votes}{List of ballot objects, such as returned by read_votes_from_csv}
@@ -21,6 +27,13 @@ showing the possible count pathways and overall result (default: FALSE)}
 
 \item{report_path}{If report is TRUE, the file name of the report
 (default: stv_ens_report.html)}
+
+\item{use_fps_for_final_tie}{In STV, when on the last tie, split using FPs;
+(default: TRUE)}
+
+\item{transfer_surplus}{In STV, do transfer votes from winners as well as losers.
+In certain circumstances it may be preferable to only transfer from losers
+(default: TRUE)}
 }
 \value{
 An STV_ens object, containing:

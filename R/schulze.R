@@ -8,9 +8,14 @@ form_schulze_paths_grid <- function(pair_results) {
     paths_grid[,row.names(paths_grid)]
 }
 
-#TODO
-#'
-#' @export
+#' Schulze count
+#' 
+#' Count votes using the Schulze method. For \code{nseats = 1} this is identical to \code{condorcet}.
+#' @param ballots The list of ballots.
+#' @param nseats The number of seats available.
+#' @param report Generate an HTML report of the vote.
+#' @param report_path When \code{report} is TRUE, the filepath to which to save the generated report.
+#' @export 
 schulze <- function(ballots, nseats = 1,
                     report = FALSE, 
                     report_path = ifelse(report,'schulze_single_report.html',NULL)) {
@@ -99,6 +104,7 @@ schulze <- function(ballots, nseats = 1,
     return(schulze_results)
 }
 
+#' @export
 print.Schulze <- function(schulze) {
     message("An avr Schulze object.")
     message("Winners:")

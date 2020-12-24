@@ -4,8 +4,17 @@
 \alias{add_row_to_transfer_matrix}
 \title{Add an entry to the transferMatrix, for cand_out}
 \usage{
-add_row_to_transfer_matrix(votes, weights, running, stillIn, cand_out,
-  prevVotes, votesForTransfer, verbose, transfer_matrix)
+add_row_to_transfer_matrix(
+  votes,
+  weights,
+  running,
+  stillIn,
+  cand_out,
+  prevVotes,
+  votesForTransfer,
+  verbose,
+  transfer_matrix
+)
 }
 \description{
 Add an entry to the transferMatrix, for cand_out

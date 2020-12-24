@@ -63,7 +63,7 @@ circlize::circos.clear()
 string_parts[5] <- paste0(string_parts[5], "\n\nTransfer fractions, looking at full ballots 
 and weighting towards higher-preference transfers, were:\n\n
 ```{r echo=FALSE}
-tra_votes <- transpose_votes(vote_results$ballots, vote_results$candidates)
+tra_votes <- transpose_votes(vote_results$votes, vote_results$candidates)
 
 #Weight 1-2 transfer twice as much as 2-3, etc. Ignore second last to last.
 transfers_full <- data.frame()
@@ -97,9 +97,9 @@ transfers_full <- merge(transfers_full, out_fractions, by=\'Candidate\')
 transfers_full$fraction_transferred <- transfers_full$fraction_transferred / transfers_full$tot_from
 
 transfers_full$Candidate <- factor(transfers_full$Candidate,
-                                   levels=rev(sort(levels(transfers_full$Candidate))))
+                                   levels=rev(sort(unique(transfers_full$Candidate))))
 transfers_full$Target <- factor(transfers_full$Target,
-                                levels=rev(sort(levels(transfers_full$Target))))
+                                levels=rev(sort(unique(transfers_full$Target))))
 ggplot2::ggplot(transfers_full, ggplot2::aes(Target,Candidate)) +
   ggplot2::geom_tile(ggplot2::aes(fill=fraction_transferred)) +
   ggplot2::scale_fill_distiller(palette='Spectral',direction=-1) + ggplot2::theme_classic()

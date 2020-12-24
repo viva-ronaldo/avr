@@ -5,8 +5,14 @@
 \title{Return the lowest-voted candidate by FPs, resolving ties randomly
 Updated so as not to miss candidates on 0 FPs}
 \usage{
-get_stv_loser(fps, stillIn, weights, order_for_ties, nseats_left,
-  use_fps_for_final_tie = FALSE)
+get_stv_loser(
+  fps,
+  stillIn,
+  weights,
+  order_for_ties,
+  nseats_left,
+  use_fps_for_final_tie = FALSE
+)
 }
 \description{
 Return the lowest-voted candidate by FPs, resolving ties randomly

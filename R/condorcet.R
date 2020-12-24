@@ -45,6 +45,13 @@ form_condorcet_grid <- function(pair_results) {
     results_grid[,row.names(results_grid)]
 }
 
+#' Condorcet count
+#' 
+#' Count votes using the Condorcet method: for \code{nseats = 1} only.
+#' @param ballots The list of ballots.
+#' @param report Generate an HTML report of the vote.
+#' @param report_path When \code{report} is TRUE, the filepath to which to save the generated report.
+#' @export 
 condorcet <- function(ballots,
                       report = FALSE, 
                       report_path = ifelse(report,'condorcet_single_report.html',NULL)) {
@@ -122,14 +129,21 @@ condorcet <- function(ballots,
             condorcet_results$points_table[, names(condorcet_results$points_table) != 'h2h_losses'],
             winners,  
             'h2h_wins', 'lightskyblue')
-        print(condorcet_results$points_table_formatted)
+        #print(condorcet_results$points_table_formatted)
 
         #note, transposing grid, so scores are column name minus row name
         condorcet_results$pairs_grid_formatted <- formattable::format_table(data.frame(t(condorcet_results$pairs_grid)),
             list(formattable::area(col = condorcet_results$candidates) ~ formattable::color_tile('palevioletred1','palegreen')), 
             align='c')
+        
+        report_path <- path.expand(report_path)  #first convert tilde, if there is one
+        if (substr(report_path,1,2) == './') report_path <- substring(report_path,3)
+        report_path <- paste(getwd(), report_path, sep='/')
+        owd <- setwd(tempdir())
+        
         saveRDS(condorcet_results, file='tmp_condorcet_single_results.rds')
-        condorcet_results[, c('pairs_grid_formatted', 'points_table_formatted')] <- NULL
+        condorcet_results$pairs_grid_formatted <- NULL
+        condorcet_results$points_table_formatted <- NULL
         
         report_text <- get_generic_report_text(method='condorcet', ensemble=FALSE)
         cat(sprintf(report_text, 
@@ -142,12 +156,14 @@ condorcet <- function(ballots,
         capture.output(suppressMessages(rmarkdown::render('tmp_condorcet_single_report.rmd', 
                                                           output_file=report_path, quiet=TRUE)))
         system('rm tmp_condorcet_single_results.rds tmp_condorcet_single_report.rmd')
+        setwd(owd)
         message(sprintf('Report written to %s',report_path))
     }
     
     return(condorcet_results)
 }
 
+#' @export
 print.Condorcet <- function(condorcet) {
     message("An avr Condorcet object.")
     message("Winners:")

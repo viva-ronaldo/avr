@@ -47,9 +47,10 @@ ensemble_stv <- function(votes, nseats, nensemble,
                          use_fps_for_final_tie=TRUE,
                          transfer_surplus=TRUE) {
     if (report) {
-        #Need ggplot2, reshape2, kableExtra, formattable to make report
-        if (length(intersect(c('ggplot2','reshape2','kableExtra','formattable'),
-                             row.names(installed.packages()))) < 4) report <- FALSE
+        #Need ggplot2, kableExtra, formattable to make report
+        if (!requireNamespace(c("ggplot2","kableExtra","formattable"), quietly = TRUE)) {
+            stop('You must install packages "ggplot2", "kableExtra", and "formattable" in order to generate a report.')
+        }   
     }
     
     elected_counts <- list()

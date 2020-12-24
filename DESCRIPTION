@@ -10,5 +10,15 @@ Depends:
 License: MIT
 LazyData: true
 Suggests:
-    testthat
-RoxygenNote: 6.0.1
+    testthat,
+    ggplot2,
+    kableExtra,
+    formattable,
+    animation,
+    tweenr,
+    rmarkdown,
+    RColorBrewer,
+    circlize
+RoxygenNote: 7.1.1
+Imports: 
+    dplyr

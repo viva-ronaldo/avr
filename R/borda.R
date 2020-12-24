@@ -10,9 +10,16 @@
 #Dowdall gives more weight to strong preferences, whereas standard Borda favours consistent medium prefs
 #For multiple seats, there is the Quota Borda method but here just using the ordered points list.
 
-
-#' Using simple nseats > 1 version rather than Quota Borda Count (using 1st pref quotas), 
-#'   because that doesn't generalise to nseats=1
+#' Borda count
+#'
+#' Count votes using the Borda method. This uses the simple \code{nseats > 1} version rather than 
+#' Quota Borda Count (using 1st pref quotas), because that doesn't generalise to \code{nseats = 1}.
+#' @param ballots The list of ballots.
+#' @param nseats The number of seats available.
+#' @param variant The variant of Borda to use. Must be one of '\code{standard}', '\code{modified}', or '\code{dowdall}'.
+#' See \url{https://en.wikipedia.org/wiki/Borda_count}.
+#' @param report Generate an HTML report of the vote.
+#' @param report_path When \code{report} is TRUE, the filepath to which to save the generated report.
 #' @export
 borda <- function(ballots, nseats=1, variant = 'standard',
                   report = FALSE, 
@@ -20,6 +27,7 @@ borda <- function(ballots, nseats=1, variant = 'standard',
     variant <- tolower(variant)
     if (!(variant %in% c('standard','modified','dowdall'))) {
         message('Don\'t recognise that variant; resorting to standard Borda count')
+        variant <- 'standard'
     }
     
     cands <- unique(unlist(ballots))
@@ -79,6 +87,12 @@ borda <- function(ballots, nseats=1, variant = 'standard',
             borda_results$points_table, 
             borda_results$winners,
             'total_points', 'pink')
+        
+        report_path <- path.expand(report_path)  #first convert tilde, if there is one
+        if (substr(report_path,1,2) == './') report_path <- substring(report_path,3)
+        report_path <- paste(getwd(), report_path, sep='/')
+        owd <- setwd(tempdir())
+        
         saveRDS(borda_results, file='tmp_borda_single_results.rds')
         borda_results$points_table_formatted <- NULL
         
@@ -93,12 +107,14 @@ borda <- function(ballots, nseats=1, variant = 'standard',
         capture.output(suppressMessages(rmarkdown::render('tmp_borda_single_report.rmd', 
                                                           output_file=report_path, quiet=TRUE)))
         system('rm tmp_borda_single_results.rds tmp_borda_single_report.rmd')
+        setwd(owd)
         message(sprintf('Report written to %s',report_path))
     }
     
     return(borda_results)
 }
 
+#' @export
 print.Borda <- function(borda) {
     message("An avr Borda object.")
     message("Winners:")

@@ -134,10 +134,10 @@ for (b in seq(stv_out$nballots)) {
 }
 
 transfers_full <- dplyr::summarise(dplyr::group_by(transfers_full, candidate, Target),
-fraction_transferred=sum(val)/sum(possible))
+fraction_transferred=sum(val)/sum(possible), .groups='drop')
 
 #normalise: as method is rough, we get outgoing fractions not summing to 1
-out_fractions <- dplyr::summarise(dplyr::group_by(transfers_full, candidate), tot_from=sum(fraction_transferred))
+out_fractions <- dplyr::summarise(dplyr::group_by(transfers_full, candidate), tot_from=sum(fraction_transferred), .groups='drop')
 transfers_full <- merge(transfers_full, out_fractions, by=\'candidate\')
 transfers_full$fraction_transferred <- transfers_full$fraction_transferred / transfers_full$tot_from
 

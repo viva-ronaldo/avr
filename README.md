@@ -1,7 +1,9 @@
 # avr
 Alternative voting systems in R.
 
-Currently supports [instant runoff voting](https://en.wikipedia.org/wiki/Instant-runoff_voting), and [single transferable vote](https://en.wikipedia.org/wiki/Single_transferable_vote).
+Currently supports [instant runoff voting](https://en.wikipedia.org/wiki/Instant-runoff_voting), and [single transferable vote](https://en.wikipedia.org/wiki/Single_transferable_vote) (STV), [Borda](https://en.wikipedia.org/wiki/Borda_count), and [Schulze/Condorcet](https://en.wikipedia.org/wiki/Condorcet_method) methods.
+
+### Input 
 
 Votes can be provided as a vector of lists of preferences, in numbered ballot card format, or read from csv:
 
@@ -37,7 +39,22 @@ votes <- list(
 # c,3,3,4,3,3,1,1,2,4
 # d,4,4,3,4,4,4,4,1,1
 votes <- read_votes_from_csv('my_votes_table.csv')
+
+# my_votes_table.csv:
+# a,b,c,d
+# 1,2,3,4
+# 1,2,3,4
+# 1,2,4,3
+# 2,1,3,4
+# 2,1,3,4
+# 3,2,1,4
+# 3,2,1,4
+# 3,4,2,1
+# 2,3,4,1
+votes <- read_votes_from_csv('my_votes_table_alt.csv', ballots_as_rows = FALSE)
 ```
+
+### Methods 
 
 STV can be run as a single iteration, or, because elections with small numbers of votes often involve ties, in ensemble mode, with ties resolved randomly:
 
@@ -48,7 +65,7 @@ stv(votes, 2)  #random resolution of ties, e.g.
 # Round 1:        a
 # Round 2:        c
 
-ensemble_stv(votes, 2, nensemble=10)
+ensemble_stv(votes, 2, nensemble = 10)
 # 3 possible pathways
 # Winners:
 #   candidate elected_pct
@@ -57,6 +74,36 @@ ensemble_stv(votes, 2, nensemble=10)
 # 3         b          38
 ```
 
-Use `report = TRUE` to output a nicely formatted report showing the round-by-round election results and the vote transfers that occurred.
+Different voting systems can produce different results:
 
-**TODO** merge stv and ensemble_stv into one function
+```r
+schulze(votes, 2)   #deterministically gives a,b as winners
+# An avr Schulze object.
+# Winners:
+# a
+# b
+```
+
+### Output
+
+Use `report = TRUE` to generate an HTML report showing the round-by-round election results and the vote transfers that occurred.
+
+```r
+stv(votes, 2, report = TRUE, report_path = './abcd_vote_report.html')
+```
+Sample:
+
+![](docs/report_screenshot_1.png){width=600px}
+
+Sample:
+
+![](docs/report_screenshot_2.png){width=480px}
+
+And for STV, an animation of the count can be generated from the count result table:
+
+```r
+count_result <- stv(votes, 2, getTable = TRUE)
+create_stv_count_gif(count_result, 'abcd_vote_count.gif')
+```
+![](docs/abcd_vote_count.gif){width=480px}
+
