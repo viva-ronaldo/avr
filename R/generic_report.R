@@ -21,10 +21,17 @@ Elected `r if (vote_results$nseats > 1) {\"were\"} else {\"was\"}` <span style=\
 
 #TODO what other plots can I show for these?
 
-string_parts[3] <- "Results were:
-```{r echo=FALSE, results=\'asis\'}
-kableExtra::kable_styling(vote_results$points_table_formatted, bootstrap_options=c(\"hover\"), full_width=F)
-```\n"
+if (method == 'stv') {
+  string_parts[3] <- "Results were:
+  ```{r echo=FALSE, results=\'asis\'}
+  vote_results$points_table_formatted
+  ```\n"
+} else {
+  string_parts[3] <- "Results were:
+  ```{r echo=FALSE, results=\'asis\'}
+  kableExtra::kable_styling(vote_results$points_table_formatted, bootstrap_options=c(\"hover\"), full_width=F)
+  ```\n"
+}
 
 string_parts[4] <- "\n\n### Alternative methods\n\n%s"
 

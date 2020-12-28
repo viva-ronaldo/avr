@@ -7,6 +7,65 @@ get_points_table_formatted <- function(points_table, winners, col2_name, bar_col
     points_table_formatted
 }
 
+get_candidate_ballot_profile <- function(votes_as_ballots, c, no_preference_value) {
+    sapply(votes_as_ballots, function(b) if (c %in% b) which(b==c) else no_preference_value)
+}
+
+get_stv_points_table_formatted_gt <- function(points_table, votes_as_ballots) {
+    points_table %>% 
+        rename(Candidate = candidate, Result = elected) %>%
+        rename_with(substr, .cols=starts_with('round'), 7, 7) %>%
+        mutate(Preferences = purrr::map(Candidate, function(c) get_candidate_ballot_profile(votes_as_ballots, c, length(count_result$candidates))),
+               Preferences = purrr::map(Preferences, kableExtra::spec_hist, col='lightgray'),
+               Preferences = purrr::map(Preferences, 'svg_text'),
+               Preferences = purrr::map(Preferences, gt::html),
+               .after=Candidate) %>%
+        mutate(`1` = as.numeric(`1`),
+               Result = ifelse(Result, 'Elected', '')
+        ) %>%
+        arrange(-`1`) %>%
+        gt() %>% 
+        cols_width(
+            gt::matches('\\d') ~ px(30)
+        ) %>%
+        cols_align(
+            align = "center",
+            columns = gt::matches('\\d')
+        ) %>%
+        text_transform(locations = gt::cells_body(gt::matches('\\d')), 
+                       function(x) ifelse(x=='E', sprintf("<span style='font-weight: bold'>%s</span>",x), x)) %>%
+        data_color(
+            columns = vars(`1`),
+            colors = scales::col_numeric(
+                palette = c('snow','pink'),
+                domain = NULL
+            ),
+            alpha = 1
+        ) %>%
+        tab_spanner(
+            label = "STV rounds",
+            columns = gt::matches('\\d')
+        ) %>%
+        tab_header(title='STV count details') %>%
+        tab_style(
+            style = list(gt::cell_text(font = "Bitter", align = "left")),
+            location = list(gt::cells_body(columns = gt::vars(Candidate)))
+        ) %>%
+        tab_style(locations = gt::cells_body(columns = gt::vars(Result)),
+                  style = list(gt::cell_text(color='green', weight='bold'))) %>%
+        tab_options(
+            heading.align = "left",
+            heading.title.font.size = 20,
+            table.border.top.color = "transparent",
+            table.border.bottom.color = "black",
+            table.border.bottom.width = px(3),
+            column_labels.border.top.width = px(3),
+            column_labels.border.top.color = "black",
+            table_body.hlines.color = "#ededed"
+        ) %>%
+        gt::as_raw_html()
+}
+
 #Return true if a vote result didn't prefer any with fewer 1ps to one with more 1ps
 check_maximized_first_prefs <- function(ballots, winners) {
     cands <- unique(unlist(ballots))

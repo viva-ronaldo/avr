@@ -93,16 +93,23 @@ ensemble_stv <- function(votes, nseats, nensemble,
         class = 'ens_STV'
     )
     
-    #TODO avoid writing to tmp_
     if (report) {
+        report_path <- path.expand(report_path)  #first convert tilde, if there is one
+        if (substr(report_path,1,2) == './') report_path <- substring(report_path,3)
+        report_path <- paste(getwd(), report_path, sep='/')
+        owd <- setwd(tempdir())
+        
+        stv_ens_results$pathways_formatted <- lapply(stv_ens_results$pathways,
+                                                     get_stv_points_table_formatted_gt, stv_ens_results$votes)
+
         saveRDS(stv_ens_results, file='tmp_stv_ens_results.rds')
         report_text <- get_report_text(ensemble=TRUE,
                                        unanimous=(nrow(ensemble_result)==nseats))
-        #cat(sprintf(report_text, 'tmp_stv_ens_results.rds'))
         cat(sprintf(report_text, 'tmp_stv_ens_results.rds'), file='tmp_stv_ens_report.rmd')
         capture.output(suppressMessages(rmarkdown::render('tmp_stv_ens_report.rmd', 
                                                           output_file=report_path, quiet=TRUE)))
         system('rm tmp_stv_ens_results.rds tmp_stv_ens_report.rmd')
+        setwd(owd)
         message(sprintf('Report written to %s',report_path))
     }
     

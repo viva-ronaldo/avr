@@ -38,17 +38,19 @@ string_parts[3] <- " There were `r stv_out$nballots` votes cast; the quota was `
 
 There were `r nrow(stv_out$count_table)` candidates, with first preferences as follows:
 ```{r echo=FALSE}
-print(if(is.element(\'count_table\',names(stv_out))) stv_out$count_table[,1:2] else stv_out$pathways[[1]][,1:2])
+kableExtra::kable_styling(knitr::kable(if(is.element(\'count_table\',names(stv_out))) stv_out$count_table[,1:2] else stv_out$pathways[[1]][,1:2], \"html\", escape=F, align=\"r\"),
+bootstrap_options=c(\"hover\"), full_width=F)
 ```
 "
 
 if (ensemble) {
     if (unanimous) {
-        string_parts[4] <- "The result was deterministic: elected were `r stv_out$ensemble_result$candidate`.\n\n"
+        string_parts[4] <- "The result was deterministic: elected were <span style=\"font-size:150%%\">**`r stv_out$ensemble_result$candidate`**</span>.\n\n"
     } else {
         string_parts[4] <- "Overall elected frequencies were:
 ```{r echo=FALSE}
-print(stv_out$ensemble_result)
+kableExtra::kable_styling(knitr::kable(stv_out$ensemble_result, \"html\", escape=F, align=\"r\"),
+bootstrap_options=c(\"hover\"), full_width=F)
 #todo use class print
 ```
 "
@@ -71,13 +73,9 @@ bootstrap_options=c(\"hover\"), full_width=F)
 "
 
 if (ensemble) {
-    string_parts[6] <- "Due to random resolution of ties, there were `r npathways` possible pathways.
+    string_parts[6] <- "Due to random resolution of ties, there were `r npathways` possible pathways. One of them was:
 ```{r echo=FALSE, results=\'asis\'}
-cat(\"\n\")
-for (p in seq_along(stv_out$pathways)) {
-cat(paste0(\"Pathway \",p,\":\n\"))
-print(pretty_print_count_table(stv_out$pathways[[p]]))
-}
+stv_out$pathways_formatted[[1]]
 ```
 "
 } else {   
@@ -142,9 +140,9 @@ transfers_full <- merge(transfers_full, out_fractions, by=\'candidate\')
 transfers_full$fraction_transferred <- transfers_full$fraction_transferred / transfers_full$tot_from
 
 transfers_full$candidate <- factor(transfers_full$candidate,
-                                   levels=rev(sort(levels(transfers_full$candidate))))
+                                   levels=rev(sort(unique(transfers_full$candidate))))
 transfers_full$Target <- factor(transfers_full$Target,
-                                levels=rev(sort(levels(transfers_full$Target))))
+                                levels=rev(sort(unique(transfers_full$Target))))
 ggplot2::ggplot(transfers_full, ggplot2::aes(Target,candidate)) +
   ggplot2::geom_tile(ggplot2::aes(fill=fraction_transferred)) +
   ggplot2::scale_fill_distiller(palette='Spectral',direction=-1) + ggplot2::theme_classic()

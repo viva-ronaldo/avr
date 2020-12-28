@@ -20,8 +20,8 @@
 #'     \item{quota:}{the STV quota}
 #'     \item{winners:}{the candidates that are elected}
 #'     \item{used_random:}{logical indicating if it was necessary to randomly break ties}
-#'     \item{transfer_matrix:}{TODO}
-#'     \item{count_table:}{TODO}
+#'     \item{transfer_matrix:}{a matrix recording the vote transfers that occurred during this count}
+#'     \item{count_table:}{a data.frame recording the number of votes for each candidate at each round in the count, and whether or not the candidate was elected}
 #'   }
 #'   
 #' @export
@@ -54,7 +54,7 @@ stv <- function(votes, nseats,
         if (!requireNamespace(c("ggplot2","kableExtra","formattable","circlize"), quietly = TRUE)) {
             stop('You must install packages "ggplot2", "kableExtra", "circlize", and "formattable" in order to generate a report.')
         }   
-        getMatrix = TRUE
+        getMatrix <- TRUE
     }
     
     winners <- c()
@@ -200,11 +200,14 @@ stv <- function(votes, nseats,
         #overwrite the stv column to make sure it matches this result in the event of used_random
         summ_res$elected_stv <- summ_res$candidate %in% winners
         
-        #stv_single_results$points_table_formatted <- get_points_table_formatted(count_table, winners)
-        stv_single_results$points_table_formatted <- get_points_table_formatted(
-            stv_single_results$count_table, 
-            stv_single_results$winners,
-            'round_1', 'palegreen')
+        #stv_single_results$points_table_formatted <- get_points_table_formatted(
+        #    stv_single_results$count_table, 
+        #    stv_single_results$winners,
+        #    'round_1', 'palegreen')
+        stv_single_results$points_table_formatted <- get_stv_points_table_formatted_gt(
+          stv_single_results$count_table,
+          votes_copy
+        )
 
         report_path <- path.expand(report_path)  #first convert tilde, if there is one
         if (substr(report_path,1,2) == './') report_path <- substring(report_path,3)

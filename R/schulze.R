@@ -86,7 +86,8 @@ schulze <- function(ballots, nseats = 1,
             list(formattable::area(col = schulze_results$candidates) ~ formattable::color_tile('palevioletred1','palegreen')), 
             align='c')
         saveRDS(schulze_results, file='tmp_schulze_single_results.rds')
-        schulze_results[, c('points_table_formatted', 'pairs_grid_formatted')] <- NULL
+        schulze_results$points_table_formatted <- NULL
+        schulze_results$pairs_grid_formatted <- NULL
         
         report_text <- get_generic_report_text(method='schulze', ensemble=FALSE)
         cat(sprintf(report_text, 
