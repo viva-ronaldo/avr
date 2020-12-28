@@ -18,4 +18,3 @@ ballot object
 \description{
 Interface for running irv on ballot cards.
 }
-

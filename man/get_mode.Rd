@@ -9,4 +9,3 @@ get_mode(x)
 \description{
 From stackoverflow.com/questions/2547402
 }
-

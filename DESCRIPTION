@@ -1,12 +1,24 @@
 Package: avr
 Title: Alternative voting systems in R.
-Version: 0.3
-Authors@R: person("Dex", "Groves", email = "dex.groves@gmail.com", role = c("aut", "cre"))
+Version: 0.4
+Authors@R: as.person(c(
+  "Dex Groves <dex.groves@gmail.com> [aut, cre]", 
+  "David Mulholland <davidmulholland17@gmail.com> [aut]"))
 Description: Implementations of instant runoff voting and single transferable vote.
 Depends:
     R (>= 3.0.0)
 License: MIT
 LazyData: true
 Suggests:
-    testthat
-RoxygenNote: 5.0.1
+    testthat,
+    ggplot2,
+    kableExtra,
+    formattable,
+    animation,
+    tweenr,
+    rmarkdown,
+    RColorBrewer,
+    circlize
+RoxygenNote: 7.1.1
+Imports: 
+    dplyr
