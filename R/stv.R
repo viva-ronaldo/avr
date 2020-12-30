@@ -260,10 +260,10 @@ get_stv_loser <- function(fps, stillIn, weights, order_for_ties,
       length(stillIn) == (nseats_left+1)) {
       #message('Breaking tie by FPs')
       return(list(loser=losers[which.max(sapply(losers, function(x) which(order_for_ties == x)))],
-                  used_random=FALSE))
+                  used_random = FALSE))
   } else {
       return(list(loser=sample(losers, 1),
-                  used_random=TRUE))   
+                  used_random = if (length(losers)>1) TRUE else FALSE))   
   }
 }
 

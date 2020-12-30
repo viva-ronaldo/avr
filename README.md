@@ -3,6 +3,14 @@ Alternative voting systems in R.
 
 Currently supports [instant runoff voting](https://en.wikipedia.org/wiki/Instant-runoff_voting), [single transferable vote](https://en.wikipedia.org/wiki/Single_transferable_vote) (STV), [Borda](https://en.wikipedia.org/wiki/Borda_count), and [Schulze/Condorcet](https://en.wikipedia.org/wiki/Condorcet_method) methods.
 
+### Installation
+
+Install using devtools:
+
+```r
+devtools::install_github("viva-ronaldo/avr")
+```
+
 ### Input 
 
 Votes can be provided as a vector of lists of preferences, in numbered ballot card format, or read from csv:
@@ -14,7 +22,7 @@ votes <- list(
   n3 = c("a", "b", "d", "c"),
   n4 = c("b", "a", "c", "d"),
   n5 = c("b", "a", "c", "d"),
-  n6 = c("c", "b", "a", "d"),
+  n6 = c("b", "c", "a", "d"),
   n7 = c("c", "b", "a", "d"),
   n8 = c("d", "c", "a", "b"),
   n9 = c("d", "a", "b", "c")
@@ -27,7 +35,7 @@ votes <- list(
   ballot(1, 2, 4, 3, map = map),
   ballot(2, 1, 3, 4, map = map),
   ballot(2, 1, 3, 4, map = map),
-  ballot(3, 2, 1, 4, map = map),
+  ballot(2, 3, 1, 4, map = map),
   ballot(3, 2, 1, 4, map = map),
   ballot(3, 4, 2, 1, map = map),
   ballot(2, 3, 4, 1, map = map)
@@ -35,8 +43,8 @@ votes <- list(
 
 # my_votes_table.csv:
 # a,1,1,1,2,2,3,3,3,2
-# b,2,2,2,1,1,2,2,4,3
-# c,3,3,4,3,3,1,1,2,4
+# b,2,2,2,1,1,1,2,4,3
+# c,3,3,4,3,3,2,1,2,4
 # d,4,4,3,4,4,4,4,1,1
 votes <- read_votes_from_csv('my_votes_table.csv')
 
@@ -47,7 +55,7 @@ votes <- read_votes_from_csv('my_votes_table.csv')
 # 1,2,4,3
 # 2,1,3,4
 # 2,1,3,4
-# 3,2,1,4
+# 2,3,1,4
 # 3,2,1,4
 # 3,4,2,1
 # 2,3,4,1
@@ -59,13 +67,13 @@ votes <- read_votes_from_csv('my_votes_table_alt.csv', ballots_as_rows = FALSE)
 STV can be run as a single iteration, or, because elections with small numbers of votes often involve ties, in ensemble mode, with ties resolved randomly:
 
 ```r
-stv(votes, 2)  #random resolution of ties, e.g.
+stv(votes, 2)  #this result is deterministic
 # An avr stv object.
 # Winners:
 # Round 1:        a
 # Round 2:        c
 
-ensemble_stv(votes, 2, nensemble = 10)
+ensemble_stv(votes_altered, 2, nensemble = 10)  #changing ballot #6 above, to create a tie
 # 3 possible pathways
 # Winners:
 #   candidate elected_pct
@@ -77,7 +85,7 @@ ensemble_stv(votes, 2, nensemble = 10)
 Different voting systems can produce different results:
 
 ```r
-schulze(votes, 2)   #deterministically gives a,b as winners
+schulze(votes_altered, 2)   #deterministically gives a,b as winners, while c can win in STV
 # An avr Schulze object.
 # Winners:
 # a

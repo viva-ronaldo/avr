@@ -16,7 +16,9 @@ get_stv_points_table_formatted_gt <- function(points_table, votes_as_ballots) {
         rename(Candidate = candidate, Result = elected) %>%
         rename_with(substr, .cols=starts_with('round'), 7, 7) %>%
         mutate(Preferences = purrr::map(Candidate, function(c) get_candidate_ballot_profile(votes_as_ballots, c, length(count_result$candidates))),
-               Preferences = purrr::map(Preferences, kableExtra::spec_hist, col='lightgray'),
+               Preferences = purrr::map(Preferences, kableExtra::spec_hist, col='lightgray',
+                                        breaks = seq(0.5, length(count_result$candidate)+0.5, 1),
+                                        lim = c(0.5, length(count_result$candidate)+0.5)),
                Preferences = purrr::map(Preferences, 'svg_text'),
                Preferences = purrr::map(Preferences, gt::html),
                .after=Candidate) %>%

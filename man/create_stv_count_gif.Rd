@@ -8,6 +8,7 @@ create_stv_count_gif(
   count_result,
   out_gif_path,
   candidate_colour_dict = NULL,
+  title = "STV count",
   frame_delay_ms = 10,
   plot_width = 3,
   plot_height = 2.5

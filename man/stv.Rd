@@ -46,8 +46,8 @@ An STV object, containing:
     \item{quota:}{the STV quota}
     \item{winners:}{the candidates that are elected}
     \item{used_random:}{logical indicating if it was necessary to randomly break ties}
-    \item{transfer_matrix:}{TODO}
-    \item{count_table:}{TODO}
+    \item{transfer_matrix:}{a matrix recording the vote transfers that occurred during this count}
+    \item{count_table:}{a data.frame recording the number of votes for each candidate at each round in the count, and whether or not the candidate was elected}
   }
 }
 \description{

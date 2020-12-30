@@ -5,7 +5,12 @@
 \title{Take the stv count table with numeric columns and return a tweenr
 animated data frame to produce the dot plots for the count}
 \usage{
-get_anim_positions_from_count_table(num_count_table, candidates, quota)
+get_anim_positions_from_count_table(
+  num_count_table,
+  candidates,
+  quota,
+  max_points_to_plot = 1000
+)
 }
 \arguments{
 \item{num_count_table}{The count table output from function stv.}

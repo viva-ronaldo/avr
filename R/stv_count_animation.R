@@ -100,6 +100,7 @@ get_anim_positions_from_count_table <- function(num_count_table, candidates, quo
 create_stv_count_gif <- function(count_result, out_gif_path, 
                                  candidate_colour_dict = NULL,
                                  title = 'STV count', 
+                                 max_points_to_plot = 1000,
                                  frame_delay_ms = 10, plot_width = 3, plot_height = 2.5) {
     if (!requireNamespace(c("tweenr", "animation"), quietly = TRUE)) {
         stop('You must install packages "tweenr" and "animation" in order to use this function')
@@ -115,7 +116,6 @@ create_stv_count_gif <- function(count_result, out_gif_path,
     quota <- count_result$quota
     
     if (is.null(candidate_colour_dict)) candidate_colour_dict <- setNames(colorRampPalette(RColorBrewer::brewer.pal(min(length(candidates),9), "Set1"))(length(candidates)), candidates)
-    max_points_to_plot <- 1000
     
     if (any(sapply(count_table[,2:(ncol(count_table)-1)], function(c) any(grepl('\\.',c))))) {
         warning('Some non-integer values in count table (partial transfers) - currently coercing to integer')
@@ -179,8 +179,11 @@ create_stv_count_gif <- function(count_result, out_gif_path,
         if (nchar(title) > 20) p <- p + ggplot2::theme(plot.title = element_text(size = max(4, 7 - 0.5*(nchar(title) %/% 10))))
         
         #find who is elected - over quota, or on the last round, use count_table$elected
-        elected_check <- tmp %>% dplyr::group_by(candidate) %>% dplyr::summarise(max_x = max(pos_x), 
-                                                                                 pos_y = dplyr::first(pos_y), .groups='drop')
+        #as above, need to use votes because pos_x can temporarily be higher than quota when a vote is transferring down
+        elected_check <- votes %>% dplyr::select(pos_x := paste0('pos_x', round_num_char), 
+                                                 pos_y := paste0('pos_y', round_num_char), 
+                                                 candidate := paste0('round_', round_num_char)) %>% 
+            group_by(candidate) %>% summarise(max_x = max(pos_x), pos_y = first(pos_y), .groups='drop')
         if (as.integer(round_num_char) == ncol(count_table)-2) {
             elected_check <- elected_check %>% dplyr::filter(candidate %in% subset(count_table, elected)$candidate)
         } else {
